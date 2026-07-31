@@ -1,10 +1,10 @@
 #include <bits/stdc++.h>
 #include <windows.h>
-#include "Database.h"
+#include "database.h"
 using namespace std;
 mt19937 gen(time(nullptr));
 
-const vector<string> leagues = {"", "Brasileirao", "Bundesliga", "Eredivisie", "La Liga", "Liga MX", "Liga NOS", "League One", "LPF", "MLS", "Premier League", "Serie A", "Saudi Pro League"};
+string delay;
 
 struct resultado{
     int goals1, goals2;
@@ -69,7 +69,7 @@ resultado simularPartida(clube team1, clube team2, bool fatorcasa, bool mata_mat
         }
         if(i > 90) cout << center << centerstr(8) << "90 + " << i - 90 << "'";
         else cout << center << centerstr(8) << i << "'";
-        Sleep(100);
+        Sleep(1);
         int chance = aleatorio(1, 100);
 
         if(chance <= chance1) {
@@ -170,31 +170,9 @@ resultado simularPartida(clube team1, clube team2, bool fatorcasa, bool mata_mat
     return res;
 }
 
-int telaliga(int i){
-    system("cls");
-    string center = centerstr(80);
-    cout << center << "     LEAGUE SELECTOR\n";
-    cout << center << "===[" << leagues[i] << "]===\n";
-    int ret;
-    int aux = 1 + (20*(i-1));
-
-    for(int j = aux; j < aux + 20; j++){
-        string a;
-        cout << center << "|["<< teams[j].name << " | " << teams[j].attack << " - " << teams[j].defense << " - " << teams[j].midfield << "]\n";
-        a = "|[" + teams[j].name + " | " + to_string(teams[j].attack) + " - " + to_string(teams[j].defense) + " - " + to_string(teams[j].midfield) + "]";
-
-        for(int i = 0; i < a.size(); i++) cout << "-";
-    }
-    cout << "Team selected: "; cin >> ret;
-    ret += aux - 1;
-    return ret;
-}
-
 int main(){
     system("cls");
     clube FLA = teams[2], RMA = teams[61];
     resultado res = simularPartida(FLA, RMA, true, true);
     showMatchInfo(res, true);
-
-
 }

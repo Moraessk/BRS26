@@ -4,11 +4,12 @@
 using namespace std;
 mt19937 gen(time(nullptr));
 
-string delay;
+const vector<string> leagues = {"", "Brasileirao", "Bundesliga", "Eredivisie", "La Liga", "Liga MX", "Liga NOS", "League One", "LPF", "MLS", "Premier League", "Serie A", "Saudi Pro League"};
 
 struct resultado{
     int goals1, goals2;
     int penalties1, penalties2;
+    string team1Name, team2Name;
 };
 struct infotorneio{
     int numberOfTeams;
@@ -24,14 +25,30 @@ string centerstr(int width){
     for(int i = 0; i < width; i++) s += " ";
     return s;
 }
-resultado simularPartida(clube team1, clube team2) {
+void showMatchInfo(resultado res, bool mata_mata) {
+    if(!mata_mata || res.goals1 != res.goals2) {
+        cout << "\n\n" << centerstr(70) << "Final Score: " << res.team1Name << " " << res.goals1 << " - " << res.goals2 << " " << res.team2Name << endl;
+    }
+    else{
+        cout << "\n\n" << centerstr(70) << "Final Score: " << res.team1Name << " " << res.goals1 << " [" << res.penalties1 << "] - [" << res.penalties2 << "] " << res.goals2 << " " << res.team2Name << endl;
+    }
+}
+resultado simularPartida(clube team1, clube team2, bool fatorcasa, bool mata_mata) {
     resultado res;
+    int moment = aleatorio(65, 80);
+    res.team1Name = team1.name;
+    res.team2Name = team2.name;
     string center = centerstr(80);
-    int acrecimo = aleatorio(0, 5);
+    int acrecimo = aleatorio(1, 8);
     double chance1 = (double)(team1.midfield)/(team1.midfield + team2.midfield) * 100;
 
-    int gx1 = int(double(team1.attack - team2.defense)/2.0);
-    int gx2 = int(double(team2.attack - team1.defense)/2.0);
+    double gx1 = int(double(team1.attack - team2.defense)/2.0);
+    double gx2 = int(double(team2.attack - team1.defense)/2.0);
+
+    if(fatorcasa){
+        gx1 *= 1.5;
+        gx2 /= 1.2;
+    }
 
     if(gx1 < 1) gx1 = 1;
     if(gx2 < 1) gx2 = 1;
@@ -43,23 +60,25 @@ resultado simularPartida(clube team1, clube team2) {
 
     int acumulativo1 = 1, acumulativo2 = 1;
     vector<string> events;
+    events.push_back("\n" + center + "===MATCH START!===\n");
 
     for(int i = 0; i <= 90 + acrecimo; i++) {
         system("cls");
         for(const string& event : events) {
             cout << event << endl;
         }
-        if(i > 90) cout << center << "90 + " << i - 90 << "'";
-        else cout << center << i << "'";
-        Sleep(50);
+        if(i > 90) cout << center << centerstr(8) << "90 + " << i - 90 << "'";
+        else cout << center << centerstr(8) << i << "'";
+        Sleep(100);
         int chance = aleatorio(1, 100);
 
         if(chance <= chance1) {
             int ChanceDeGol = aleatorio(1, 100);
             if(ChanceDeGol <= gx1/acumulativo1) {
                 res.goals1++;
-                cout << center << " - " << team1.name << " scored a goal! Total goals: " << res.goals1;
-                events.push_back(center + to_string(i) + "' - " + team1.name + " scored!");
+                cout << center << " - " << team1.name << " scored!";
+                if(i<=90) events.push_back(center + to_string(i) + "' - " + team1.name + " scored!");
+                else events.push_back(center + "90 + " + to_string(i-90) + "' - " + team1.name + " scored!");
                 if(res.goals1 > 3 && dif > 2) acumulativo1 *= 2;
                 if(res.goals2 > 3 && dif > 2) gx1 *= 2;
             }
@@ -67,8 +86,9 @@ resultado simularPartida(clube team1, clube team2) {
             int ChanceDeGol = aleatorio(1, 100);
             if(ChanceDeGol <= gx2/acumulativo2) {
                 res.goals2++;       
-                cout << center << " - " << team2.name << " scored a goal! Total goals: " << res.goals2;
-                events.push_back(center + to_string(i) + "' - " + team2.name + " scored!");
+                cout << center << " - " << team2.name << " scored!";
+                if(i<=90) events.push_back(center + to_string(i) + "' - " + team2.name + " scored!");
+                else events.push_back(center + "90 + " + to_string(i-90) + "' - " + team2.name + " scored!");
                 if(res.goals2 > 3 && dif > 2) acumulativo2 *= 2;
                 if(res.goals1 > 3 && dif > 2) gx2 *= 2;
             }
@@ -78,13 +98,118 @@ resultado simularPartida(clube team1, clube team2) {
             gx1 *= 4;
             gx2 *= 4;
         }
+        if(i == 45){
+            events.push_back("\n" + centerstr(70) + "45' - HT [" + team1.name + " " + to_string(res.goals1) + " - " + to_string(res.goals2) + " " + team2.name + "]\n");
+        }
+
+        if(i == 90 + acrecimo){
+            events.push_back(center + "90 + " + to_string(acrecimo) + "' - FT");
+             events.push_back("\n" + center + "===MATCH END!===");
+        }
+        if(i == moment && !(res.goals1 + res.goals2)){
+            events.push_back(centerstr(70) + "- the match is getting intense but stil goalless");
+            gx1 *= 2;
+            gx2 *= 2;
+        }
     }
-    cout << " - Match Finished!";
+    system("cls");
+    for(const string& event : events) {
+        cout << event << endl;
+    }
+    if(mata_mata && res.goals1 == res.goals2){
+        cout << "\n\n" << centerstr(75) << "PENALTY SHOOTOUT!\n";
+        events.push_back("\n" + center + "===PENALTY SHOOTOUT!===\n");
+        res.penalties1 = 0;
+        res.penalties2 = 0;
+        int penaltyRound = 1;
+        while(true){
+            system("cls");
+            for(const string& event : events) {
+                cout << event << endl;
+            }
+            string a = center + centerstr(7);
+            cout << a << "(" << res.penalties1 << " - " << res.penalties2 << ") - " << penaltyRound << "\n";
+            a += " ";
+            int chance1 = aleatorio(1, 100);
+            int chance2 = aleatorio(1, 100);
+            cout << center << "   Simulting...\n";
+            Sleep(1000);
+            if(chance1 <= 70){
+                res.penalties1++;
+                a += "O";
+            }
+            else{
+                a += "X";
+            }
+            a += " - ";
+            cout << a;
+            Sleep(1000);
+            if(chance2 <= 70){
+                res.penalties2++;
+                a += "O";
+            }
+            else{
+                a += "X";
+            }
+            events.push_back(a);
+            int dif = abs(res.penalties1 - res.penalties2);
+            if(dif > 5 - penaltyRound && dif != 0){
+                system("cls");
+                for(const string& event : events) {
+                    cout << event << endl;
+                } 
+                break;
+            }
+            penaltyRound++;
+            if(penaltyRound == 6){
+                events.push_back("\n" + center + "===Sudden Death!===\n");
+            }
+        }
+    }
 
     return res;
 }
 
+int selecionarliga(int id){
+    system("cls");
+    string center = centerstr(80), ctr = centerstr(75);
+    int ret;
+    int aux = 1 + (20*(id-1));
+    int maior = 0;
+    for(int j = aux; j < aux + 20; j++){
+        if(!(teams[j].defense)) continue;
+        string a; int x;
+        a = "|[" + teams[j].name + " | ATA: " + to_string(teams[j].attack) + " - DEF: " + to_string(teams[j].defense) + " - MID: " + to_string(teams[j].midfield) + "]   ";
+        
+        x = a.size();
+        maior = max(x, maior);
+    }
+    int ax = (maior/2) - 8;
+
+    cout << center << centerstr(ax)<< "LEAGUE SELECTOR\n\n";
+    ax = (maior/2) - 4 - ((leagues[id].size())/2);
+    cout << center << centerstr(ax) << "===[" << leagues[id] << "]===\n";
+    cout << center;
+    for(int i = 0; i <= maior; i++) cout << "-";
+    cout << "\n";
+    for(int j = aux; j < aux + 20; j++){
+        if(!(teams[j].defense)) continue;
+        string a;
+        a = "|[" + teams[j].name + " | ATA: " + to_string(teams[j].attack) + " - DEF: " + to_string(teams[j].defense) + " - MID: " + to_string(teams[j].midfield) + "]   ";
+        while(a.size() <= maior) a += " ";
+        cout << center << a << "| ("<< (j-aux+1) <<")\n";
+        cout << center;
+        for(int i = 0; i <= maior; i++) cout << "-";
+        cout << "\n";
+    }
+    cout << center << "Team selected: "; cin >> ret;
+    ret += aux - 1;
+    return ret;
+}
+
 int main(){
     system("cls");
+    
+
 
 }

@@ -1,6 +1,6 @@
-#pragma once
-#include <vector>
-#include <string>
+#pragma once //.h
+#include <bits/stdc++.h>
+#include <windows.h>
 
 struct clube{
     std::string name;
