@@ -245,7 +245,11 @@ int selecionartime(int id){
         if(!(teams[j].defense)) continue;
         string a;
         a = "|[" + teams[j].name + " | ATA: " + to_string(teams[j].attack) + " - DEF: " + to_string(teams[j].defense) + " - MID: " + to_string(teams[j].midfield) + "]   ";
-        while(a.size() <= maior) a += " ";
+        int x = a.size();
+        while(x <= maior) {
+            a += " ";
+            x = a.size();
+        }
         cout << center << a << "| ("<< (j-aux+1) <<")\n";
         cout << center;
         for(int i = 0; i <= maior; i++) cout << "-";
