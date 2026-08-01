@@ -3,7 +3,7 @@
 std::vector<clube> teams = {
     {"World Class", 99, 99, 99, 0}, //Aqui ta nessa ordem: nome, meio campo, ataque e defesa
     //Brasileirão 1 - 20
-    {"Palmeiras", 80, 81, 85, 1}, {"Flamengo", 77, 84, 81, 2}, {"Corinthians", 74, 76, 77, 3}, {"Fluminense", 73, 78, 76, 4}, {"Bahia", 71, 76, 74, 5}, 
+    {"Palmeiras", 80, 81, 83, 1}, {"Flamengo", 77, 84, 81, 2}, {"Corinthians", 74, 76, 77, 3}, {"Fluminense", 73, 78, 76, 4}, {"Bahia", 71, 76, 74, 5}, 
     {"Botafogo", 70, 74, 75, 6}, {"Athletico Paranaense", 72, 73, 73, 7}, {"Atletico Mineiro", 70, 74, 73, 8}, {"Red Bull Bragantino", 69, 72, 72, 9}, 
     {"Sao Paulo", 71, 72, 70, 10}, {"Gremio", 68, 71, 71, 11}, {"Cruzeiro", 67, 70, 71, 12}, {"Internacional", 68, 69, 68, 13}, {"Santos", 65, 69, 72, 14}, 
     {"Vasco da Gama", 65, 68, 68, 15}, {"Coritiba", 65, 66, 67, 16}, {"Vitoria", 64, 66, 67, 17}, {"Mirassol", 64, 65, 66, 18}, {"Remo", 63, 65, 66, 19}, 
@@ -71,7 +71,7 @@ std::vector<clube> teams = {
     {"Frosinone", 63, 65, 67, 219}, {"Monza", 63, 65, 66, 220},
 
     //Saudi Pro League 221 - 240
-    {"Al-Hilal", 82, 86, 87, 221}, {"Al-Ahli", 80, 83, 84, 222}, {"Al-Nassr", 79, 84, 86, 223}, {"Al-Ittihad", 78, 81, 82, 224}, {"Al-Qadsiah", 75, 79, 80, 225}, {"NEOM SC", 72, 75, 77, 226}, 
+    {"Al-Hilal", 79, 81, 83, 221}, {"Al-Ahli", 79, 80, 81, 222}, {"Al-Nassr", 79, 84, 86, 223}, {"Al-Ittihad", 78, 81, 82, 224}, {"Al-Qadsiah", 75, 79, 80, 225}, {"NEOM SC", 72, 75, 77, 226}, 
     {"Al-Shabab", 70, 72, 73, 227}, {"Al-Ettifaq", 68, 70, 71, 228}, {"Al-Taawoun", 68, 69, 70, 229}, {"Al-Khaleej", 66, 67, 69, 230}, {"Al-Fayha", 66, 67, 68, 231}, {"Al-Kholood", 64, 66, 68, 232}, 
     {"Al-Diriyah", 64, 66, 67, 233}, {"Al-Fateh", 63, 65, 67, 234}, {"Al-Faisaly", 63, 65, 66, 235}, {"Abha", 63, 65, 66, 236}, {"Al-Riyadh", 62, 64, 66, 237}, {"Al-Hazem", 62, 64, 66, 238}, 
     {"NA", 0, 0, 0, 239}, {"NA", 0, 0, 0, 240}
