@@ -13,7 +13,7 @@ struct resultado{
     bool jogou = false; // Adicionei o campo jogou para indicar se a partida já foi jogada
 };
 struct infotorneio{
-    int numberOfTeams;
+    int numberOfTeams; 
     vector<clube> teams, vencedores;
 
     vector<vector<resultado>> jogos; // Adicionei o campo bracket para armazenar os resultados do torneio
@@ -43,6 +43,7 @@ void embaralhar(vector<clube> &x){
         shuffle(x.begin(), x.end(), gen);
     }
 }
+
 void showASCII(int i){
     cout << centerstr(i) << "    [][][] [][][] [][][] [] [][][] [][][] []       [][][] []  [] [][][] [][][] \n";
     cout << centerstr(i) << "   []     []  [] []  [] [] []     []  [] []           [] [] []      [] []      \n";
@@ -281,7 +282,6 @@ int calcularRodadas(int x){
     }
     return 0;
 }
-
 void inicializarTorneio(infotorneio &info, int numberOfTeams) {
     info.numberOfTeams = numberOfTeams;
     info.teams.clear();
@@ -290,6 +290,7 @@ void inicializarTorneio(infotorneio &info, int numberOfTeams) {
         info.teams.push_back(teams[teamIndex]);
     }
     embaralhar(info.teams);
+    
     vector<vector<resultado>> aux(calcularRodadas(numberOfTeams) + 1);
     int ax = aux.size();
     for(int i = 0; i < ax; i++) {
@@ -297,13 +298,17 @@ void inicializarTorneio(infotorneio &info, int numberOfTeams) {
         aux[i].resize(numMatches);
     }
     info.jogos = aux;
+
+    int N = info.numberOfTeams;
+    N = round(log2(N));
+    int quantidadevencedores = pow(2, N) - 1;
+    vector<clube> vencedores(quantidadevencedores, {"", 0, 0, 0, -1});
+    info.vencedores = vencedores;
 }
 
-vector<string> gerarpartida(const clube &team1, const clube &team2, int fase, int maior) {
+vector<string> gerarpartida(const clube &team1, const clube &team2, int maior) { //gera o quadradinho dos dois times no chaveamento(braccet) do mata-mata.
     vector<string> ret;
     string center = centerstr(80);
-
-    int distanciadaborda = (maior + 5)*fase;
     
     string a, b;
     
@@ -317,9 +322,9 @@ vector<string> gerarpartida(const clube &team1, const clube &team2, int fase, in
     a += "  ";
     int tamanho = a.size();
     for(int j = 1; j <= tamanho; j++) b += "-";
-    ret.push_back(centerstr(distanciadaborda) + " " + b + " ");
-    ret.push_back(centerstr(distanciadaborda) + "|" + a + "|");
-    ret.push_back(centerstr(distanciadaborda) + "|" + b + "|");
+    ret.push_back(" " + b + " ");
+    ret.push_back("|" + a + "|");
+    ret.push_back("|" + b + "|");
     a.clear();
     x = team2.name.size();
     som =(maior - x)/2;
@@ -329,9 +334,9 @@ vector<string> gerarpartida(const clube &team1, const clube &team2, int fase, in
     a += team2.name;
     for(int j = 1; j <= som; j++) a += " ";
     a += "  ";
-    ret.push_back(centerstr(distanciadaborda) + "|" + a + "|");
+    ret.push_back("|" + a + "|");
     tamanho = a.size();
-    ret.push_back(centerstr(distanciadaborda) + " " + b + " ");
+    ret.push_back(" " + b + " ");
 
     return ret;
 }
@@ -340,16 +345,16 @@ vector<string> gerarbracket(infotorneio info){
     system("cls");
     vector<string> ret;
     int maior = 0;
-    for(const clube &eqp : info.teams){
+    for(const clube &eqp : info.teams){ //descobre o time com o maior nome para poder centralizar os nomes dos times no bracket
         int x = eqp.name.size();
         maior = max(x, maior);
     }
     int mid = (maior + 6)/2;
-    if(maior % 2) maior++;
+    if(maior % 2) maior++; // Evita bug de centralização quando o maior nome tem tamanho ímpar
     bool conecta = true;
     int maiorlinha = 0;
     for(int i = 0; i < info.numberOfTeams; i += 2){
-        vector<string> partida = gerarpartida(info.teams[i], info.teams[i+1], 0, maior);
+        vector<string> partida = gerarpartida(info.teams[i], info.teams[i+1], maior);
         for(const string &linha : partida){
             ret.push_back(linha);
         }
@@ -358,7 +363,7 @@ vector<string> gerarbracket(infotorneio info){
             a = centerstr(mid) + "  |";
             ret.push_back(a);
             string b = a;
-            while(b.size() < maior + 11){
+            while(b.size() < maior + 13){
                 b += "-";
             }
             ret.push_back(b);
@@ -380,6 +385,27 @@ vector<string> gerarbracket(infotorneio info){
             linha += " ";
         }
     }
+    queue<int> linhadonovobracket;
+    for(int i = 0; i < ret.size(); i++){
+        if(ret[i][ret[i].size() - 1] == '-'){
+            linhadonovobracket.push(i);
+        }
+    }
+    int winners = 0;
+    while(!linhadonovobracket.empty()){
+        for(int i = 0; i < ret.size(); i++){
+            if(i == linhadonovobracket.front()){
+                i -= 2;
+                vector<string> match = gerarpartida(info.vencedores[winners], info.vencedores[winners + 1], maior);
+                winners += 2;
+                for(const string &linha : match){
+                    ret[i] += linha;
+                    i++;
+                }
+                linhadonovobracket.pop();
+            }
+        }
+    }
 
 
     return ret;
@@ -389,7 +415,7 @@ vector<string> gerarbracket(infotorneio info){
 int main(){
     system("cls");
     infotorneio info;
-    int numberOfTeams = 16;
+    int numberOfTeams = 8;
     inicializarTorneio(info, numberOfTeams);
     vector<string> bracket = gerarbracket(info);
     
