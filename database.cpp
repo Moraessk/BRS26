@@ -75,5 +75,5 @@ std::vector<clube> teams = {
     {"Al-Shabab", 70, 72, 73, 227}, {"Al-Ettifaq", 68, 70, 71, 228}, {"Al-Taawoun", 68, 69, 70, 229}, {"Al-Khaleej", 66, 67, 69, 230}, {"Al-Fayha", 66, 67, 68, 231}, {"Al-Kholood", 64, 66, 68, 232}, 
     {"Al-Diriyah", 64, 66, 67, 233}, {"Al-Fateh", 63, 65, 67, 234}, {"Al-Faisaly", 63, 65, 66, 235}, {"Abha", 63, 65, 66, 236}, {"Al-Riyadh", 62, 64, 66, 237}, {"Al-Hazem", 62, 64, 66, 238}, 
     {"NA", 0, 0, 0, 239}, {"NA", 0, 0, 0, 240}
-
+    //Borussia Monchengladbach é o time com + caracteries 26 no total.
 };

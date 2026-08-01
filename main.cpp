@@ -9,17 +9,21 @@ string Stopatscreen;
 struct resultado{
     int goals1, goals2;
     int penalties1, penalties2;
-    string team1Name, team2Name;
+    int team1id, team2id;
+    bool jogou = false; // Adicionei o campo jogou para indicar se a partida já foi jogada
 };
 struct infotorneio{
     int numberOfTeams;
     vector<clube> teams;
+    vector<vector<resultado>> jogos; // Adicionei o campo bracket para armazenar os resultados do torneio
+
 };
 
 int aleatorio(int a, int b) {
     uniform_int_distribution<int> dist(a, b);
     return dist(gen);
 }
+
 string centerstr(int width){
     string s = "";
     for(int i = 0; i < width; i++) s += " ";
@@ -27,10 +31,15 @@ string centerstr(int width){
 }
 void showMatchInfo(resultado res, bool mata_mata) {
     if(!mata_mata || res.goals1 != res.goals2) {
-        cout << "\n\n" << centerstr(70) << "Final Score: " << res.team1Name << " " << res.goals1 << " - " << res.goals2 << " " << res.team2Name << endl;
+        cout << "\n\n" << centerstr(70) << "Final Score: " << teams[res.team1id].name << " " << res.goals1 << " - " << res.goals2 << " " << teams[res.team2id].name << endl;
     }
     else{
-        cout << "\n\n" << centerstr(70) << "Final Score: " << res.team1Name << " " << res.goals1 << " [" << res.penalties1 << "] - [" << res.penalties2 << "] " << res.goals2 << " " << res.team2Name << endl;
+        cout << "\n\n" << centerstr(70) << "Final Score: " << teams[res.team1id].name << " " << res.goals1 << " [" << res.penalties1 << "] - [" << res.penalties2 << "] " << res.goals2 << " " << teams[res.team2id].name << endl;
+    }
+}
+void embaralhar(vector<clube> &x){
+    for(int i = 0; i < 90; i++){
+        shuffle(x.begin(), x.end(), gen);
     }
 }
 void showASCII(int i){
@@ -42,11 +51,13 @@ void showASCII(int i){
     cout << centerstr(i-5) << "======================================================================================== \n";
 
 }
+
 resultado simularPartida(clube team1, clube team2, bool fatorcasa, bool mata_mata) {
     resultado res;
+    res.jogou = true; // Vou deixar marcado para nao dar cao la no torneio
     int moment = aleatorio(65, 80);
-    res.team1Name = team1.name;
-    res.team2Name = team2.name;
+    res.team1id = team1.id;
+    res.team2id = team2.id;
     string center = centerstr(80);
     int acrecimo = aleatorio(1, 8);
     double chance1 = (double)(team1.midfield)/(team1.midfield + team2.midfield) * 100;
@@ -70,16 +81,16 @@ resultado simularPartida(clube team1, clube team2, bool fatorcasa, bool mata_mat
     int acumulativo1 = 1, acumulativo2 = 1;
     vector<string> events;
     events.push_back("\n" + center + "===MATCH START!===\n");
+    string centerstr73 = centerstr(73), centerstr8 = centerstr(8);
 
     for(int i = 0; i <= 90 + acrecimo; i++) {
         system("cls");
-        showASCII(55);
-        cout << centerstr(73) << "[" << team1.name << " " << res.goals1 << " x " << res.goals2 << " " << team2.name << "]";
+        cout << centerstr73 << "[" << team1.name << " " << res.goals1 << " x " << res.goals2 << " " << team2.name << "]";
         for(const string& event : events) {
             cout << event << endl;
         }
-        if(i > 90) cout << center << centerstr(8) << "90 + " << i - 90 << "'";
-        else cout << center << centerstr(8) << i << "'";
+        if(i > 90) cout << center << centerstr8 << "90 + " << i - 90 << "'";
+        else cout << center << centerstr8 << i << "'";
         Sleep(100);
         int chance = aleatorio(1, 100);
 
@@ -219,6 +230,7 @@ int selecionarliga(){
     system("cls");
     return ret;
 }
+
 int selecionartime(int id){
     system("cls");
     string center = centerstr(80), ctr = centerstr(75);
@@ -261,16 +273,115 @@ int selecionartime(int id){
     return ret;
 }
 
+int calcularRodadas(int x){
+    for(int i = 0; x > 1; i++){
+        x /= 2;
+        if(x == 1) return i;
+    }
+    return 0;
+}
+
+void inicializarTorneio(infotorneio &info, int numberOfTeams) {
+    info.numberOfTeams = numberOfTeams;
+    info.teams.clear();
+    for(int i = 0; i < numberOfTeams; i++) {
+        int teamIndex = selecionartime(selecionarliga());
+        info.teams.push_back(teams[teamIndex]);
+    }
+    embaralhar(info.teams);
+    vector<vector<resultado>> aux(calcularRodadas(numberOfTeams) + 1);
+    int ax = aux.size();
+    for(int i = 0; i < ax; i++) {
+        int numMatches = numberOfTeams / (1 << (i + 1));
+        aux[i].resize(numMatches);
+    }
+    info.jogos = aux;
+}
+
+vector<string> gerarbracket(infotorneio info){
+    system("cls");
+    vector<string> ret;
+    int maior = 0;
+    for(const clube &eqp : info.teams){
+        int x = eqp.name.size();
+        maior = max(x, maior);
+    }
+    string ax;
+    int rows = info.numberOfTeams;
+    string space = centerstr(10);
+    string maxspace = "  ";
+
+        ret.push_back("");
+        bool trade = false; //o trade ta aq so para corrigir uma possibilidade de a string usada como ref. ter tamanho impar.
+        if(maior%2){ maior++; trade = true;}
+        for(int i = 0; i < rows - 1; i += 2){
+            string a, b;
+            for(int j = 0; j < maior + 4; j++) a += "-";
+            a += " ";
+            ret.push_back(" " + a + "");
+            b = a;
+            a.clear();
+            for(int j = 0; j < maior + 4; j++) a += "-";
+
+            string t1 = "  ";
+            int x;
+            x = info.teams[i].name.size();
+            int dif = maior - info.teams[i].name.size();
+            for(int j = 1; j <= dif/2; j++) t1 += " ";
+            if(x%2) t1 += " ";
+            t1 += info.teams[i].name;
+            if(x%2 && trade){
+                x++;
+                t1 += " ";
+            }
+            for(int j = 1; j <= dif/2; j++) t1 += " ";
+            t1 += "  ";
+            ret.push_back("|" + t1 + "|");
+            ret.push_back("|" + a + "|");
+            a += "--";
+            string t2 = "  ";
+            dif = maior - info.teams[i+1].name.size();
+            for(int j = 1; j <= dif/2; j++) t2 += " ";
+            x =info.teams[i+1].name.size();
+            if(x%2) t2 += " ";
+            t2 += info.teams[i+1].name;
+            if(x%2 && trade){
+                x++;
+                t1 += " ";
+            }
+            for(int j = 1; j <= dif/2; j++) t2 += " ";
+            t2 += "  ";
+            ax = t2;
+            ret.push_back("|" + t2 + "|");
+            ret.push_back(" " + b + "");
+            ret.push_back("");
+            ret.push_back("");
+            ret.push_back("");
+        }
+        bool next = false;
+
+        for(string &linha : ret){
+            if(next){
+                next = false;
+                linha += "         |";
+            }
+            if(linha[0] == '|' && linha[1] == '-'){
+                linha += "---------|"; // 9 de tamanho (9 "-"s).
+                next = true;
+            }
+        }
+
+    return ret;
+}
+
 
 int main(){
-    do{
-        system("cls");
-        int x = selecionartime(selecionarliga()), y = selecionartime(selecionarliga());
-        clube Time1 = teams[x], Time2 = teams[y];
-        cout << centerstr(70) << "Today's Match is between " << Time1.name << " and " << Time2.name << ".\n";
-        resultado res = simularPartida(Time1, Time2, false, true);
-        showMatchInfo(res, true);
-        cin >> Stopatscreen;
-    }while(true);
-
+    infotorneio info;
+    int numberOfTeams = 8;
+    inicializarTorneio(info, numberOfTeams);
+    vector<string> bracket = gerarbracket(info);
+    
+    for(const string& line : bracket) {
+        cout << line;
+    }
 }
