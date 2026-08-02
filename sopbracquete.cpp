@@ -352,6 +352,7 @@ vector<string> gerarbracket(infotorneio info){
     if(maior % 2) maior++; // Evita bug de centralização quando o maior nome tem tamanho ímpar
     bool conecta = true;
     int maiorlinha = 0;
+    vector<int> linhadesc;
     for(int i = 0; i < info.numberOfTeams; i += 2){
         vector<string> partida = gerarpartida(info.teams[i], info.teams[i+1], maior);
         for(const string &linha : partida){
@@ -373,9 +374,22 @@ vector<string> gerarbracket(infotorneio info){
             conecta = true;
             ret.push_back("");
             ret.push_back("");
+            linhadesc.push_back(ret.size());
             ret.push_back("");
         }
     }
+    vector<vector<int>> encontros(calcularRodadas(info.numberOfTeams));
+    int cnt = 0;
+    while(linhadesc.size() != 1){
+        for(int i = 0; i < linhadesc.size(); i++){
+            encontros[cnt].push_back(linhadesc[i]);
+            linhadesc.erase(linhadesc.begin() + i);
+        }
+        cnt++;
+    }
+    encontros[cnt].push_back(linhadesc[0]);
+
+
     for(const string &linha : ret){
         maiorlinha = max(maiorlinha, (int)linha.size());
     }
@@ -391,12 +405,11 @@ vector<string> gerarbracket(infotorneio info){
         }
     }
     int winners = 0;
-
-    if(info.numberOfTeams == -1){
-
-    }
-    else
-    {   while(!linhadonovobracket.empty()){
+    int ps = 0;
+    int limit = 1;
+    while(!linhadonovobracket.empty() && limit <= calcularRodadas(info.numberOfTeams)){
+        linhadonovobracket = queue<int>();
+        for(int &x : encontros[ps]) linhadonovobracket.push(x);
             for(string &linha : ret){
                 maiorlinha = max(maiorlinha, (int)linha.size());
             }
@@ -449,8 +462,8 @@ vector<string> gerarbracket(infotorneio info){
                 }
                 auxiliar.pop();
             }
+            limit++;
         }
-    }
     for(int i = ret.size()/2 + 3; i < ret.size(); i++){
             ret[i].pop_back();
     }
@@ -458,13 +471,6 @@ vector<string> gerarbracket(infotorneio info){
     return ret;
 }
 
-clube torneio_mata_mata(infotorneio &info){
-    for(int i = 0; i < calcularRodadas(info.numberOfTeams); i++){
-
-    }
-
-    return info.vencedores[info.vencedores.size() - 1];
-}
 
 int main(){
     system("cls");
