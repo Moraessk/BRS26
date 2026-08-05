@@ -2,7 +2,16 @@
 
 mt19937 gen(time(nullptr));
 
-const vector<string> leagues = {"Brasileirao", "Bundesliga", "Eredivise", "LaLiga", "Liga MX", "Liga NOS", "League ONE", "LPF", "MLS", "Premier League", "Serie A", "Saudi Pro League"};
+const vector<string> leagues = {"Brasileirao", "Bundesliga", "Eredivise", "LaLiga", "Liga MX", "Liga NOS", "League ONE", "LPF", "MLS", "Premier League", "Serie A", "Saudi Pro League", "Internacional FIFA", "Voltar"};
+const vector<string> menu_inicial = {"Jogo Rapido", "Torneio", "Configuracoes", "Sair"};
+
+
+
+//configurações globais:
+int screensize = 261;
+
+
+
 
 struct resultado{
     int gols1 = 0, gols2 = 0, golspenalti1 = 0, golspenalti2 = 0;
@@ -10,7 +19,7 @@ struct resultado{
     vector<string> melhores_momentos;
 };
 
-string centerstr(const string &a, const int &screensize){ //Tamanho da tela: 261 caracters
+string centerstr(const string &a, const int &screensize){ //Tamanho da tela: screensize caracters
     int tamanho = a.size();
     string b = "";
     for(int i = 0; i < (screensize - tamanho)/2; i++){
@@ -20,7 +29,7 @@ string centerstr(const string &a, const int &screensize){ //Tamanho da tela: 261
     return b;
 }
 
-string barstr(const string &a, const int &screensize){ //Tamanho da tela: 261 caracters
+string barstr(const string &a, const int &screensize){ //Tamanho da tela: screensize caracters
     int tamanho = a.size();
     string b = "";
     for(int i = 0; i < (screensize - tamanho)/2; i++){
@@ -187,10 +196,10 @@ string abreviar(string &a){
 clube simular_penaltis(resultado &res){
     res.melhores_momentos.push_back("");
     string frase = "=========[DECISAO POR PENALTIS]==========";
-    res.melhores_momentos.push_back(centerstr(frase, 261));
+    res.melhores_momentos.push_back(centerstr(frase, screensize));
     int penaltyRound = 1;
     while(true){
-        res.melhores_momentos.push_back(centerstr("Round "+ to_string(penaltyRound) + ": ", 255));
+        res.melhores_momentos.push_back(centerstr("Round "+ to_string(penaltyRound) + ": ", screensize - 6));
         rendelizar(res.melhores_momentos);
         Sleep(300);
         system("cls");
@@ -232,7 +241,7 @@ clube simular_penaltis(resultado &res){
     }
     string score = res.t1.nome + " " + to_string(res.gols1) + " [" + to_string(res.golspenalti1) + "] x [" + to_string(res.golspenalti2) + "] " + to_string(res.gols2) + " " + res.t2.nome;
     res.melhores_momentos.push_back("");
-    res.melhores_momentos.push_back(centerstr(score, 261));
+    res.melhores_momentos.push_back(centerstr(score, screensize));
     if(res.golspenalti1 > res.golspenalti2){
         return res.t1;
     }
@@ -253,25 +262,25 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
     vector<string> eventos;
     string bar = repeat("-", 50);
     string frase_inicio = addbar(match_started, (int)32);
-    string space = repeat(" ", 261);
+    string space = repeat(" ", screensize);
     eventos.push_back(space);
-    eventos.push_back(centerstr(bar, 261));
+    eventos.push_back(centerstr(bar, screensize));
     bar = repeat("-", 30);
-    eventos.push_back(centerstr(addbar(frase_inicio, 52), 261));
-    eventos.push_back(centerstr(addbar(bar, 52), 261));
+    eventos.push_back(centerstr(addbar(frase_inicio, 52), screensize));
+    eventos.push_back(centerstr(addbar(bar, 52), screensize));
     bar = repeat("-", 50);
     string ax = "";
-    eventos.push_back(centerstr(addbar(ax, 52), 261));
+    eventos.push_back(centerstr(addbar(ax, 52), screensize));
 
     int acrecimos = aleatorio(0,8);
 
     for(int i = 0; i <= 90 + acrecimos; i++){
         system("cls");
-        rendelizarcentro(placar(placar_final, 20), 261);
+        rendelizarcentro(placar(placar_final, 20), screensize);
         rendelizar(eventos);
         string minuto = to_string(i) + "'";
         if(i > 90) minuto = "90' + " + to_string(i - 90);
-        cout << centerstr(addbar(minuto, 52), 261);
+        cout << centerstr(addbar(minuto, 52), screensize);
         Sleep(100);
         clube favevent = calcularevento(time1, time2);
 
@@ -282,7 +291,7 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
             if(converter <= GolsExperados){
                 placar_final.gols1++;;
                 string frase = minuto + " " + time1.nome + " Scored!";
-                eventos.push_back(centerstr(addbar(frase, 52), 261));
+                eventos.push_back(centerstr(addbar(frase, 52), screensize));
             }
         }
         else{
@@ -292,21 +301,21 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
             if(converter <= GolsExperados){
                 placar_final.gols2++;
                 string frase = minuto + " " + time2.nome + " Scored!";
-                eventos.push_back(centerstr(addbar(frase, 52), 261));
+                eventos.push_back(centerstr(addbar(frase, 52), screensize));
             }
         }
         if(i == 90 + acrecimos){
-            eventos.push_back(centerstr(addbar(ax, 52), 261));
-            eventos.push_back(centerstr(bar, 261));
+            eventos.push_back(centerstr(addbar(ax, 52), screensize));
+            eventos.push_back(centerstr(bar, screensize));
         }
         if(i == 45){
             string t1 = time1.nome, t2 = time2.nome;
-            eventos.push_back(centerstr(addbar(ax, 52), 261));
+            eventos.push_back(centerstr(addbar(ax, 52), screensize));
             ax = "[HALF TIME : " + abreviar(t1) + " " + to_string(placar_final.gols1) + " x " + to_string(placar_final.gols2) + " " + abreviar(t2) + "]";
             ax = barstr(ax, 50);
-            eventos.push_back(centerstr(addbar(ax, 52), 261));
+            eventos.push_back(centerstr(addbar(ax, 52), screensize));
             ax = "";
-            eventos.push_back(centerstr(addbar(ax, 52), 261));
+            eventos.push_back(centerstr(addbar(ax, 52), screensize));
         }
         placar_final.melhores_momentos = eventos;
     }
@@ -314,7 +323,7 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
     if(mata_mata && placar_final.gols1 == placar_final.gols2){
         placar_final.vencedor = simular_penaltis(placar_final);
     }
-    rendelizarcentro(placar(placar_final, 20), 261);
+    rendelizarcentro(placar(placar_final, 20), screensize);
     cout << "\n";
     rendelizar(placar_final.melhores_momentos);
     string lixo;
@@ -327,15 +336,43 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
 
 int gerarmenu(vector<string> lista){
     vector<string> menu;
+    int ret;
     int maior = 50;
     for(const string &x : lista){
-        
+        int num = x.size();
+        maior = max(num, maior);
     }
+    string bar = repeat("-", maior);
+    string div = addbar(bar, maior + 2);
+    
+    menu.push_back(centerstr(bar, screensize));
+    for(string x : lista){
+        menu.push_back(centerstr(div, screensize));
+        menu.push_back(centerstr(addbar(x, maior + 2), screensize));
+    }
+    menu.erase(menu.begin() + 1);
+    menu.push_back(centerstr(bar, screensize));
+    nivelar(menu);
+    
+    int cont = 1;
+    int percorrer = menu.size();
+    for(int i = 0; i < percorrer; i++){
+        if(i%2){
+            menu[i] += " [" + to_string(cont) + "]";
+            cont++;
+        }
+    }
+
+    nivelar(menu);
+
+    rendelizar(menu);
+    cout << centerstr("[  Decisao  ]:", screensize);
+    cin >> ret;
+    return ret;
 }
 
 int main(){
-    clube time1 = teams[2], time2 = teams[61];
-    resultado r;
-    simular_partida(time1, time2, 1, 1);
+    //int fluxo_de_menu;
+    gerarmenu(leagues);
 
 }
