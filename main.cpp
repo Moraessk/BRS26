@@ -2,11 +2,11 @@
 
 mt19937 gen(time(nullptr));
 
-
+const vector<string> leagues = {"Brasileirao", "Bundesliga", "Eredivise", "LaLiga", "Liga MX", "Liga NOS", "League ONE", "LPF", "MLS", "Premier League", "Serie A", "Saudi Pro League"};
 
 struct resultado{
     int gols1 = 0, gols2 = 0, golspenalti1 = 0, golspenalti2 = 0;
-    clube t1, t2;
+    clube t1, t2, vencedor;
     vector<string> melhores_momentos;
 };
 
@@ -102,13 +102,25 @@ vector<string> nivelar(vector<string> frame){
     return frame;
 }
 
-int gx(const clube time1, const clube time2, int minute){
-    int g = time1.ataque - time2.defesa;
+int gx(resultado res, int minute, int ordem){ //0 nao muda e 1 muda
+    int g = res.t1.ataque - res.t2.defesa;
+    int acumulativo = 1;
+    if(ordem) g = res.t2.ataque - res.t1.defesa;
 
     if(minute > 85){
-        g += 4;
+        g += 10;
     }
     if(g < 1) g = 1;
+
+    int dif = abs(res.gols1 - res.gols2);
+    if(dif > 2 && res.gols1 > res.gols2){
+        while(dif > 2){
+            dif--;
+            acumulativo++;
+        }
+        g /= acumulativo;
+    }
+    if(g > 12) g = 12;
     return g;
 }
 
@@ -172,17 +184,60 @@ string abreviar(string &a){
     return ret;
 }
 
-clube simular_penaltis(resultado res, const clube &time1, const clube &time2){
+clube simular_penaltis(resultado &res){
+    res.melhores_momentos.push_back("");
     string frase = "=========[DECISAO POR PENALTIS]==========";
     res.melhores_momentos.push_back(centerstr(frase, 261));
     int penaltyRound = 1;
     while(true){
+        res.melhores_momentos.push_back(centerstr("Round "+ to_string(penaltyRound) + ": ", 255));
+        rendelizar(res.melhores_momentos);
+        Sleep(300);
+        system("cls");
+        int x = res.melhores_momentos.size() - 1;
+        auto gol = aleatorio(1,100);
+        if(gol <= 75){
+            res.golspenalti1++;
+            res.melhores_momentos[x] += "| O ";
+        }
+        else{
+            res.melhores_momentos[x] += "| X ";
+        }
+
+        res.melhores_momentos[x] += "|";
+        rendelizar(res.melhores_momentos);
+        Sleep(300);
+        system("cls");
+        gol = aleatorio(1, 100);
+
+        if(gol <= 75){
+            res.golspenalti2++;
+            res.melhores_momentos[x] += " O |";
+        }
+        else{
+            res.melhores_momentos[x] += " X |";
+        }
+
+        rendelizar(res.melhores_momentos);
+        Sleep(300);
+        system("cls");
+
+
 
         int dif = abs(res.golspenalti1 - res.golspenalti2);
             if(dif > 5 - penaltyRound && dif != 0){
                 break;
             }
             penaltyRound++;
+    }
+    string score = res.t1.nome + " " + to_string(res.gols1) + " [" + to_string(res.golspenalti1) + "] x [" + to_string(res.golspenalti2) + "] " + to_string(res.gols2) + " " + res.t2.nome;
+    res.melhores_momentos.push_back("");
+    res.melhores_momentos.push_back(centerstr(score, 261));
+    if(res.golspenalti1 > res.golspenalti2){
+        return res.t1;
+    }
+    else{
+        return res.t2;
     }
 
 }
@@ -215,12 +270,13 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
         rendelizarcentro(placar(placar_final, 20), 261);
         rendelizar(eventos);
         string minuto = to_string(i) + "'";
+        if(i > 90) minuto = "90' + " + to_string(i - 90);
         cout << centerstr(addbar(minuto, 52), 261);
         Sleep(100);
         clube favevent = calcularevento(time1, time2);
 
         if(favevent.id == time1.id){
-            int GolsExperados = gx(time1, time2, i);
+            int GolsExperados = gx(placar_final, i, 0);
             if(fatorcasa) GolsExperados += 3;
             int converter = aleatorio(1, 100);
             if(converter <= GolsExperados){
@@ -230,7 +286,8 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
             }
         }
         else{
-            int GolsExperados = gx(time2, time1, i);
+            int GolsExperados = gx(placar_final, i, 1);
+            if(fatorcasa) GolsExperados -= 3;
             int converter = aleatorio(1, 100);
             if(converter <= GolsExperados){
                 placar_final.gols2++;
@@ -254,9 +311,12 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
         placar_final.melhores_momentos = eventos;
     }
     system("cls");
+    if(mata_mata && placar_final.gols1 == placar_final.gols2){
+        placar_final.vencedor = simular_penaltis(placar_final);
+    }
     rendelizarcentro(placar(placar_final, 20), 261);
     cout << "\n";
-    rendelizar(eventos);
+    rendelizar(placar_final.melhores_momentos);
     string lixo;
     cin >> lixo;
     
@@ -265,9 +325,17 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
     return placar_final;
 }
 
+int gerarmenu(vector<string> lista){
+    vector<string> menu;
+    int maior = 50;
+    for(const string &x : lista){
+        
+    }
+}
+
 int main(){
-    clube time1 = teams[1], time2 = teams[2];
+    clube time1 = teams[2], time2 = teams[61];
     resultado r;
-    simular_penaltis(r, time1, time2);
+    simular_partida(time1, time2, 1, 1);
 
 }
