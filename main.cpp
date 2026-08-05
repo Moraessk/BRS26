@@ -371,8 +371,29 @@ int gerarmenu(vector<string> lista){
     return ret;
 }
 
+int selecionartime(){
+    int idret;
+    int num = gerarmenu(leagues);
+    num--;
+    num = num*20;
+    vector<string> equipes;
+    for(int i = 1 + num; i <= 20 + num; i++){
+        equipes.push_back(teams[i].nome);
+    }
+    system("cls");
+    int nx = gerarmenu(equipes);
+    idret = num + nx;
+
+    return idret;
+}
+
 int main(){
-    //int fluxo_de_menu;
-    gerarmenu(leagues);
+    /*int fluxo_de_menu = gerarmenu(menu_inicial);
+    system("cls");
+    if(fluxo_de_menu == 1){
+
+    }
+    */
+   cout << selecionartime();
 
 }
