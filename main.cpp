@@ -7,9 +7,9 @@ mt19937 gen(time(nullptr));
 const vector<string> leagues = {"", "Brasileirao", "Bundesliga", "Eredivisie", "La Liga", "Liga MX", "Liga NOS", "League One", "LPF", "MLS", "Premier League", "Serie A", "Saudi Pro League"};
 string Stopatscreen;
 struct resultado{
-    int goals1, goals2;
-    int penalties1, penalties2;
-    int team1id, team2id;
+    int goals1 = 0, goals2 = 0;
+    int penalties1 = 0, penalties2 = 0;
+    int team1id = 0, team2id = 0;
     bool jogou = false; // Adicionei o campo jogou para indicar se a partida já foi jogada
 };
 struct infotorneio{
@@ -91,7 +91,7 @@ resultado simularPartida(clube team1, clube team2, bool fatorcasa, bool mata_mat
         }
         if(i > 90) cout << center << centerstr8 << "90 + " << i - 90 << "'";
         else cout << center << centerstr8 << i << "'";
-        Sleep(100);
+        Sleep(5);
         int chance = aleatorio(1, 100);
 
         if(chance <= chance1) {
@@ -127,8 +127,8 @@ resultado simularPartida(clube team1, clube team2, bool fatorcasa, bool mata_mat
         }
 
         if(i == 90 + acrecimo){
-            events.push_back(centerstr(70) + "90 + " + to_string(acrecimo) + "' - FT");
-             events.push_back("\n" + center + "===MATCH END!===");
+            events.push_back(centerstr(70) + "90 + " + to_string(acrecimo) + "' - FT: " + team1.name + " " + to_string(res.goals1) + " x " + to_string(res.goals2) + " " + team2.name);
+            events.push_back("\n" + center + "===MATCH END!===");
         }
         if(i == moment && !(res.goals1 + res.goals2)){
             events.push_back(centerstr(70) + "===the match is getting intense but stil goalless===");
@@ -279,6 +279,42 @@ int calcularRodadas(int x){
         if(x == 1) return i;
     }
     return 0;
+}
+
+vector<string> showresult(resultado res, int N){
+    string a = teams[res.team1id].name + " " + to_string(res.goals1) + " ";
+    string b = " " + to_string(res.goals1) + " " + teams[res.team2id].name;
+    if(res.penalties1 > 0){
+        a = teams[res.team1id].name + " " + to_string(res.goals1) + " [" + to_string(res.penalties1) + "] ";
+        b = " [" + to_string(res.penalties2) + "]" + to_string(res.goals1) + " " + teams[res.team2id].name;
+    }
+    
+    string line = "   ";
+    int dif = (a.size() - b.size())/2;
+    if((a.size() - b.size())%2) dif++;
+    for(int i = 0; i < dif; i++){
+        line += " ";
+    }
+
+    line += a;
+
+    for(int i = 0; i < dif; i++){
+        line += " ";
+    }
+
+    line += " x ";
+
+
+
+    dif = (b.size() - a.size())/2;
+    if((b.size() - a.size())%2) dif++;
+    for(int i = 0; i < dif; i++){
+        line += " ";
+    }
+    
+    vector<string> ret;
+
+    return ret;
 }
 
 infotorneio inicializarTorneio(infotorneio &info, int numberOfTeams) {
@@ -525,6 +561,7 @@ int saudartorneiomm(){
 }
 
 void showbracket(const vector<string> &ret){
+    system("cls");
     for(const string &x : ret){
         cout << x << "\n";
     }
@@ -536,8 +573,8 @@ clube torneio_mata_mata(infotorneio &info){
     int jogos_da_rodada = info.numberOfTeams/2;
     int i = 0;
    
-        showbracket(gerarbracket(info));
-        Sleep(10000);
+        showbracket(gerarbracket(info)); 
+        cin >> Stopatscreen;
         for(int j = 0; j < (jogos_da_rodada*2); j += 2){
             info.jogos[i] = simularPartida(info.teams[j], info.teams[j + 1], false, true);
             cin >> delay;
@@ -545,15 +582,20 @@ clube torneio_mata_mata(infotorneio &info){
             else info.vencedores[i] = info.teams[j+1];
             if(info.jogos[i].penalties1 + info.jogos[i].penalties2){
                 info.jogos[i].goals1 += info.jogos[i].penalties1;
-                info.jogos[i].goals1 += info.jogos[i].penalties1;
+                info.jogos[i].goals2 += info.jogos[i].penalties2;
             }
             i++;
         }
         jogos_da_rodada /= 2;
         int vencedor = 0;
         while(jogos_da_rodada != 1){
-            showbracket(gerarbracket(info));
-            Sleep(10000);
+            showbracket(gerarbracket(info)); 
+            showbracket(gerarbracket(info)); 
+            showbracket(gerarbracket(info)); 
+            showbracket(gerarbracket(info)); 
+            showbracket(gerarbracket(info)); 
+            showbracket(gerarbracket(info)); 
+            cin >> Stopatscreen;
 
             for(int j = 0; j < jogos_da_rodada*2; j++){
                 info.jogos[i] = simularPartida(info.vencedores[vencedor], info.vencedores[vencedor + 1], false, true);
@@ -562,7 +604,7 @@ clube torneio_mata_mata(infotorneio &info){
                 else info.vencedores[i] = info.vencedores[vencedor + 1];
                 if(info.jogos[i].penalties1 + info.jogos[i].penalties2){
                     info.jogos[i].goals1 += info.jogos[i].penalties1;
-                    info.jogos[i].goals1 += info.jogos[i].penalties1;
+                    info.jogos[i].goals2 += info.jogos[i].penalties2;
                 }
                 vencedor += 2;
                 i++;
@@ -570,8 +612,13 @@ clube torneio_mata_mata(infotorneio &info){
 
             jogos_da_rodada /= 2;
         }
-        showbracket(gerarbracket(info));
-        Sleep(10000);
+        showbracket(gerarbracket(info)); 
+        showbracket(gerarbracket(info)); 
+        showbracket(gerarbracket(info)); 
+        showbracket(gerarbracket(info)); 
+        showbracket(gerarbracket(info)); 
+        showbracket(gerarbracket(info)); 
+        cin >> Stopatscreen;
 
         system("cls");
         cout << "\n\n\n\n\n\n\n";
@@ -581,19 +628,29 @@ clube torneio_mata_mata(infotorneio &info){
         cout << centerstr(75) << "   []     [] [] [[] [][][] []\n";
         cout << centerstr(75) << "  []     [] []  [] []  [] [][][] []\n";
         cout << centerstr(75) << "====================================\n";
+        Sleep(3000);
         cout << centerstr(75) << "press any key + enter to continue!\n"; Sleep(5000);
         system("cls");
 
         info.jogos[info.jogos.size() - 1] = simularPartida(info.vencedores[info.vencedores.size() - 3],info.vencedores[info.vencedores.size() - 2],false, true);
-        Sleep(10000);
-
+        cin >> Stopatscreen;
         showbracket(gerarbracket(info));
-        Sleep(10000);
+        cin >> Stopatscreen;
     return info.vencedores[info.vencedores.size() - 1];
 }
 
 int main(){
     system("cls");
+    /*resultado result; 
+    result.goals1 = 3;
+    result.goals2 = 0;
+    result.penalties1 = 0;
+    result.penalties2 = 0;
+    result.team1id = 2;
+    result.team2id = 1;
+    showresult(result, 55); */
+
     infotorneio info;
     clube campeao = torneio_mata_mata(info);
+    cout << centerstr(70) <<  campeao.name << " Venceu!";
 }
