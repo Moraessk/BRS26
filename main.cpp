@@ -1,656 +1,273 @@
-#include <bits/stdc++.h>
-#include <windows.h>
 #include "Database.cpp"
-using namespace std;
+
 mt19937 gen(time(nullptr));
 
-const vector<string> leagues = {"", "Brasileirao", "Bundesliga", "Eredivisie", "La Liga", "Liga MX", "Liga NOS", "League One", "LPF", "MLS", "Premier League", "Serie A", "Saudi Pro League"};
-string Stopatscreen;
+
+
 struct resultado{
-    int goals1 = 0, goals2 = 0;
-    int penalties1 = 0, penalties2 = 0;
-    int team1id = 0, team2id = 0;
-    bool jogou = false; // Adicionei o campo jogou para indicar se a partida já foi jogada
-};
-struct infotorneio{
-    int numberOfTeams;
-    vector<clube> teams, vencedores;
-    vector<resultado> jogos; // Adicionei o campo bracket para armazenar os resultados do torneio
-
+    int gols1 = 0, gols2 = 0, golspenalti1 = 0, golspenalti2 = 0;
+    clube t1, t2;
+    vector<string> melhores_momentos;
 };
 
-int aleatorio(int a, int b) {
-    uniform_int_distribution<int> dist(a, b);
+string centerstr(const string &a, const int &screensize){ //Tamanho da tela: 261 caracters
+    int tamanho = a.size();
+    string b = "";
+    for(int i = 0; i < (screensize - tamanho)/2; i++){
+        b += " ";
+    }
+    b += a;
+    return b;
+}
+
+string barstr(const string &a, const int &screensize){ //Tamanho da tela: 261 caracters
+    int tamanho = a.size();
+    string b = "";
+    for(int i = 0; i < (screensize - tamanho)/2; i++){
+        b += "=";
+    }
+    b += a;
+    int x = b.size();
+    while(x < screensize){
+        b += "=";
+        x = b.size();
+    }
+    return b;
+}
+
+int aleatorio(const int &inicio, const int &fim){
+    uniform_int_distribution<int> dist(inicio, fim);
     return dist(gen);
 }
 
-string centerstr(int width){
-    string s = "";
-    for(int i = 0; i < width; i++) s += " ";
-    return s;
+clube calcularevento(const clube &a, const clube &b){
+    double razao = (double)a.meio_campo/(double)(a.meio_campo + b.meio_campo);
+    razao *= 100;
+    int chance = aleatorio(1, 100);
+    if(chance <= razao) return a;
+    else return b;
 }
-void showMatchInfo(resultado res, bool mata_mata) {
-    if(!mata_mata || res.goals1 != res.goals2) {
-        cout << "\n\n" << centerstr(70) << "Final Score: " << teams[res.team1id].name << " " << res.goals1 << " - " << res.goals2 << " " << teams[res.team2id].name << endl;
+
+void rendelizar(const vector<string> &dados){
+    for(const string &line : dados){
+        cout << line << "\n";
+    }
+}
+
+void rendelizarcentro(const vector<string> &dados, int size){
+    for(const string &line : dados){
+        cout << centerstr(line, size) << "\n";
+    }
+}
+
+string addbar(string &a, int size){
+    size -= 2;
+    string ret = "|";
+    int tamanho = a.size();
+    if(tamanho % 2 == 1){ 
+        ret += " ";
+    }
+
+    for(int i = 0; i < (size - tamanho)/2; i++){
+        ret += " ";
+    }
+
+    ret += a;
+
+    for(int i = 0; i < (size - tamanho)/2; i++){
+        ret += " ";
+    }
+
+    ret += "|";
+
+    return ret;
+}
+
+vector<string> nivelar(vector<string> frame){
+    int size;
+    int maxsize = frame[0].size();
+    for(string &line : frame){
+        size = line.size();
+        maxsize = max(size, maxsize);
+    }
+
+    for(string &line : frame){
+        int x = line.size();
+        while(x < maxsize){
+            line += " ";
+            x = line.size();
+        }
+    }
+
+    return frame;
+}
+
+int gx(const clube time1, const clube time2, int minute){
+    int g = time1.ataque - time2.defesa;
+
+    if(minute > 85){
+        g += 4;
+    }
+    if(g < 1) g = 1;
+    return g;
+}
+
+
+vector<string> placar(resultado &r, int mai){
+    vector<string> plac;
+    int maior = mai;
+    if(true){
+        int a = r.t1.nome.size();
+        int b = r.t2.nome.size();
+        maior = max(a, maior);
+        maior = max(b, maior);
+    }
+    string a = r.t1.nome;
+    if(a.size()%2) a += " ";
+    a = addbar(a, maior + 4);
+    string b = r.t2.nome;
+    if(b.size()%2) b += " ";
+    b = addbar(b, maior + 4);
+
+    string bar = " ";
+    int x = a.size();
+    for(int i = 0; i < x - 2; i++){
+        bar += "-";
+    }
+    bar += " ";
+    a += " [" + to_string(r.gols1) + "]";
+    b += " [" + to_string(r.gols2) + "]";
+    plac.push_back(bar);
+    plac.push_back(a);
+    plac.push_back(bar);
+    plac.push_back(b);
+    plac.push_back(bar);
+
+    plac = nivelar(plac);
+
+    return plac;
+
+}
+
+string repeat(string a, int qtd){
+    string d = "";
+    for(int i = 0; i < qtd; i++){
+        d += a;
+    }
+    return d;
+}
+
+string abreviar(string &a){
+    string ret = "";
+    if(a.size() > 3){
+        for(int i = 0; i < 3; i++){
+        ret += a[i];
+        }
+        ret += ".";
     }
     else{
-        cout << "\n\n" << centerstr(70) << "Final Score: " << teams[res.team1id].name << " " << res.goals1 << " [" << res.penalties1 << "] - [" << res.penalties2 << "] " << res.goals2 << " " << teams[res.team2id].name << endl;
+        ret += a;
     }
-}
-void embaralhar(vector<clube> &x){
-    for(int i = 0; i < 90; i++){
-        shuffle(x.begin(), x.end(), gen);
-    }
-}
-void showASCII(int i){
-    cout << centerstr(i) << "    [][][] [][][] [][][] [] [][][] [][][] []       [][][] []  [] [][][] [][][] \n";
-    cout << centerstr(i) << "   []     []  [] []  [] [] []     []  [] []           [] [] []      [] []      \n";
-    cout << centerstr(i) << "  []     [][][] [][][] [] [] [[] []  [] []       [][][] [][]   [][][] [][][]   \n";
-    cout << centerstr(i) << " []     []  [] []     [] []  [] []  [] []       []     [] []  []     []  []    \n";
-    cout << centerstr(i) << "[][][] []  [] []     [] [][][] [][][] [][][]   [][][] []  [] [][][] [][][]     \n";
-    cout << centerstr(i-5) << "======================================================================================== \n";
-
+    
+    return ret;
 }
 
-resultado simularPartida(clube team1, clube team2, bool fatorcasa, bool mata_mata) {
-    resultado res;
-    res.jogou = true; // Vou deixar marcado para nao dar cao la no torneio
-    int moment = aleatorio(65, 80);
-    res.team1id = team1.id;
-    res.team2id = team2.id;
-    string center = centerstr(80);
-    int acrecimo = aleatorio(1, 8);
-    double chance1 = (double)(team1.midfield)/(team1.midfield + team2.midfield) * 100;
+clube simular_penaltis(resultado res, const clube &time1, const clube &time2){
+    string frase = "=========[DECISAO POR PENALTIS]==========";
+    res.melhores_momentos.push_back(centerstr(frase, 261));
+    int penaltyRound = 1;
+    while(true){
 
-    double gx1 = int(double(team1.attack - team2.defense)/2.0);
-    double gx2 = int(double(team2.attack - team1.defense)/2.0);
-
-    if(fatorcasa){
-        gx1 *= 1.5;
-        gx2 /= 1.2;
-    }
-
-    if(gx1 < 1) gx1 = 1;
-    if(gx2 < 1) gx2 = 1;
-
-    res.goals1 = 0;
-    res.goals2 = 0;
-
-    int dif = abs(res.goals1 - res.goals2);
-
-    int acumulativo1 = 1, acumulativo2 = 1;
-    vector<string> events;
-    events.push_back("\n" + center + "===MATCH START!===\n");
-    string centerstr73 = centerstr(73), centerstr8 = centerstr(8);
-
-    for(int i = 0; i <= 90 + acrecimo; i++) {
-        system("cls");
-        cout << centerstr73 << "[" << team1.name << " " << res.goals1 << " x " << res.goals2 << " " << team2.name << "]";
-        for(const string& event : events) {
-            cout << event << endl;
-        }
-        if(i > 90) cout << center << centerstr8 << "90 + " << i - 90 << "'";
-        else cout << center << centerstr8 << i << "'";
-        Sleep(5);
-        int chance = aleatorio(1, 100);
-
-        if(chance <= chance1) {
-            int ChanceDeGol = aleatorio(1, 100);
-            if(ChanceDeGol <= gx1/acumulativo1) {
-                res.goals1++;
-                cout << center << " - " << team1.name << " scored!";
-                if(i<=90) {events.push_back(center + to_string(i) + "' - " + team1.name + " scored!");}
-                else if(dif > 1){events.push_back(center + "90 + " + to_string(i-90) + "' - " + team1.name + " scored!");}
-                else {events.push_back(center + "90 + " + to_string(i-90) + "' - " + team1.name + " scored! Unbeliveable!");}
-                if(res.goals1 > 3 && dif > 2) acumulativo1 *= 2;
-                if(res.goals2 > 3 && dif > 2) gx1 *= 2;
-            }
-        } else {
-            int ChanceDeGol = aleatorio(1, 100);
-            if(ChanceDeGol <= gx2/acumulativo2) {
-                res.goals2++;       
-                cout << center << " - " << team2.name << " scored!";
-                if(i<=90) {events.push_back(center + to_string(i) + "' - " + team2.name + " scored!");}
-                else if(dif > 1){events.push_back(center + "90 + " + to_string(i-90) + "' - " + team2.name + " scored!");}
-                else {events.push_back(center + "90 + " + to_string(i-90) + "' - " + team2.name + " scored! Unbeliveable!");}
-                if(res.goals2 > 3 && dif > 2) acumulativo2 *= 2;
-                if(res.goals1 > 3 && dif > 2) gx2 *= 2;
-            }
-        }
-        dif = abs(res.goals1 - res.goals2);
-        if(i == 85){
-            gx1 *= 3;
-            gx2 *= 3;
-        }
-        if(i == 45){
-            events.push_back("\n" + centerstr(70) + "45' - HT [" + team1.name + " " + to_string(res.goals1) + " - " + to_string(res.goals2) + " " + team2.name + "]\n");
-        }
-
-        if(i == 90 + acrecimo){
-            events.push_back(centerstr(70) + "90 + " + to_string(acrecimo) + "' - FT: " + team1.name + " " + to_string(res.goals1) + " x " + to_string(res.goals2) + " " + team2.name);
-            events.push_back("\n" + center + "===MATCH END!===");
-        }
-        if(i == moment && !(res.goals1 + res.goals2)){
-            events.push_back(centerstr(70) + "===the match is getting intense but stil goalless===");
-            gx1 *= 2;
-            gx2 *= 2;
-        }
-    }
-    system("cls");
-    showASCII(55);
-    for(const string& event : events) {
-        cout << event << endl;
-    }
-    if(mata_mata && res.goals1 == res.goals2){
-        cout << "\n\n" << centerstr(75) << "PENALTY SHOOTOUT!\n";
-        events.push_back("\n" + center + "===PENALTY SHOOTOUT!===\n");
-        res.penalties1 = 0;
-        res.penalties2 = 0;
-        int penaltyRound = 1;
-        while(true){
-            system("cls");
-            showASCII(55);
-            for(const string& event : events) {
-                cout << event << endl;
-            }
-            string a = center + centerstr(7);
-            cout << a << "(" << res.penalties1 << " - " << res.penalties2 << ") - " << penaltyRound << "\n";
-            a += " ";
-            int chance1 = aleatorio(1, 100);
-            int chance2 = aleatorio(1, 100);
-            cout << center << "   Simulting...\n";
-            Sleep(1000);
-            if(chance1 <= 70){
-                res.penalties1++;
-                a += "O";
-            }
-            else{
-                a += "X";
-            }
-            a += " - ";
-            cout << a;
-            Sleep(1000);
-            if(chance2 <= 70){
-                res.penalties2++;
-                a += "O";
-            }
-            else{
-                a += "X";
-            }
-            events.push_back(a);
-            int dif = abs(res.penalties1 - res.penalties2);
+        int dif = abs(res.golspenalti1 - res.golspenalti2);
             if(dif > 5 - penaltyRound && dif != 0){
-                system("cls");
-                showASCII(55);
-                for(const string& event : events) {
-                    cout << event << endl;
-                } 
                 break;
             }
             penaltyRound++;
-            if(penaltyRound == 6){
-                events.push_back("\n" + center + "===Sudden Death!===\n");
-            }
-        }
     }
-
-    return res;
-}
-
-int selecionarliga(){
-    string center = centerstr(80);
-    int maior = 0;
-
-    for(const string &x : leagues){
-        int y = x.size();
-        maior = max(maior, y);
-    }
-    int j = 0;
-    showASCII(66);
-    cout << center << " ";
-    for(int i = 0; i < maior + 22; i++) cout << "-";
-    cout << "\n";
-    for(const string &x : leagues){
-        if(x != ""){
-            string a = "          ";
-            int dif = maior - x.size();
-            for(int i = 0; i < dif/2; i++) a += " ";
-            if(x.size() % 2) a += " ";
-            a += x;
-            a += "          ";
-            for(int i = 0; i < dif/2; i++) a += " ";
-            cout << center << "|[" << a << "]| (" << j << ")\n";
-            cout << center << " ";
-            for(int i = 0; i < maior + 22; i++) cout << "-";
-            cout << "\n";
-        }
-        j++;
-    }
-    int ret; cout << center << "Liga Selecionada: "; cin >> ret;
-    system("cls");
-    return ret;
-}
-
-int selecionartime(int id){
-    system("cls");
-    string center = centerstr(80), ctr = centerstr(75);
-    int ret;
-    int aux = 1 + (20*(id-1));
-    int maior = 0;
-    for(int j = aux; j < aux + 20; j++){
-        if(!(teams[j].defense)) continue;
-        string a; int x;
-        a = "|[" + teams[j].name + " | ATA: " + to_string(teams[j].attack) + " - DEF: " + to_string(teams[j].defense) + " - MID: " + to_string(teams[j].midfield) + "]   ";
-        
-        x = a.size();
-        maior = max(x, maior);
-    }
-    int ax = (maior/2) - 8;
-    showASCII(69);
-    cout << center << centerstr(ax)<< "LEAGUE SELECTOR\n\n";
-    ax = (maior/2) - 4 - ((leagues[id].size())/2);
-    cout << center << centerstr(ax) << "===[" << leagues[id] << "]===\n";
-    cout << center;
-    for(int i = 0; i <= maior; i++) cout << "-";
-    cout << "\n";
-    for(int j = aux; j < aux + 20; j++){
-        if(!(teams[j].defense)) continue;
-        string a;
-        a = "|[" + teams[j].name + " | ATA: " + to_string(teams[j].attack) + " - DEF: " + to_string(teams[j].defense) + " - MID: " + to_string(teams[j].midfield) + "]   ";
-        int x = a.size();
-        while(x <= maior) {
-            a += " ";
-            x = a.size();
-        }
-        cout << center << a << "| ("<< (j-aux+1) <<")\n";
-        cout << center;
-        for(int i = 0; i <= maior; i++) cout << "-";
-        cout << "\n";
-    }
-    cout << center << "Team selected: "; cin >> ret;
-    ret += aux - 1;
-    system("cls");
-    return ret;
-}
-
-int calcularRodadas(int x){
-    for(int i = 0; x > 1; i++){
-        x /= 2;
-        if(x == 1) return i;
-    }
-    return 0;
-}
-
-vector<string> showresult(resultado res, int N){
-    string a = teams[res.team1id].name + " " + to_string(res.goals1) + " ";
-    string b = " " + to_string(res.goals1) + " " + teams[res.team2id].name;
-    if(res.penalties1 > 0){
-        a = teams[res.team1id].name + " " + to_string(res.goals1) + " [" + to_string(res.penalties1) + "] ";
-        b = " [" + to_string(res.penalties2) + "]" + to_string(res.goals1) + " " + teams[res.team2id].name;
-    }
-    
-    string line = "   ";
-    int dif = (a.size() - b.size())/2;
-    if((a.size() - b.size())%2) dif++;
-    for(int i = 0; i < dif; i++){
-        line += " ";
-    }
-
-    line += a;
-
-    for(int i = 0; i < dif; i++){
-        line += " ";
-    }
-
-    line += " x ";
-
-
-
-    dif = (b.size() - a.size())/2;
-    if((b.size() - a.size())%2) dif++;
-    for(int i = 0; i < dif; i++){
-        line += " ";
-    }
-    
-    vector<string> ret;
-
-    return ret;
-}
-
-infotorneio inicializarTorneio(infotorneio &info, int numberOfTeams) {
-    info.numberOfTeams = numberOfTeams;
-    info.teams.clear();
-    for(int i = 0; i < numberOfTeams; i++) {
-        int teamIndex = selecionartime(selecionarliga());
-        info.teams.push_back(teams[teamIndex]);
-    }
-    embaralhar(info.teams);
-    vector<resultado> aux(numberOfTeams - 1);
-    info.jogos = aux;
-
-    int N = info.numberOfTeams;
-    N = round(log2(N));
-    int quantidadevencedores = pow(2, N) - 1;
-    vector<clube> vencedores(quantidadevencedores, {"", 0, 0, 0, -1});
-    info.vencedores = vencedores;
-    return info;
-}
-
-vector<string> gerarpartida(const clube &team1, const clube &team2, int maior, resultado res) { //gera o quadradinho dos dois times no chaveamento(braccet) do mata-mata.
-    vector<string> ret;
-    string center = centerstr(80);
-    
-    string a, b;
-    
-    int x = team1.name.size();
-    int som =(maior - x)/2;
-    a += "  ";
-    for(int j = 1; j <= som; j++) a += " ";
-    a += team1.name;
-    if(x%2) a += " ";
-    for(int j = 1; j <= som; j++) a += " ";
-    a += "  ";
-    int tamanho = a.size();
-    for(int j = 1; j <= tamanho; j++) b += "-";
-    ret.push_back(" " + b + " ");
-    ret.push_back("|" + a + "| [" +  to_string(res.goals1 )+ "]");
-    ret.push_back("|" + b + "| ");
-    a.clear();
-    x = team2.name.size();
-    som =(maior - x)/2;
-    if(x%2) a += " ";
-    a += "  ";
-    for(int j = 1; j <= som; j++) a += " ";
-    a += team2.name;
-    for(int j = 1; j <= som; j++) a += " ";
-    a += "  ";
-    ret.push_back("|" + a + "| [" + to_string(res.goals2)+ "]");
-    tamanho = a.size();
-    ret.push_back(" " + b + " ");
-
-    return ret;
-}
-
-vector<string> gerarbracket(infotorneio info){
-    system("cls");
-    int winners = 0;
-    vector<string> ret;
-    int maior = 20;
-    for(const clube &eqp : info.teams){ //descobre o time com o maior nome para poder centralizar os nomes dos times no bracket
-        int x = eqp.name.size();
-        maior = max(x, maior);
-    }
-    int mid = (maior + 6)/2;
-    if(maior % 2) maior++; // Evita bug de centralização quando o maior nome tem tamanho ímpar
-    bool conecta = true;
-    int maiorlinha = 0;
-    vector<int> linhadesc;
-    for(int i = 0; i < info.numberOfTeams; i += 2){
-        vector<string> partida = gerarpartida(info.teams[i], info.teams[i+1], maior, info.jogos[(i+1)/2]);
-        for(const string &linha : partida){
-            ret.push_back(linha);
-        }
-        if(conecta){
-            string a;
-            a = centerstr(mid) + "  |";
-            ret.push_back(a);
-            string b = a;
-            while(b.size() < maior + 13){
-                b += "-";
-            }
-            ret.push_back(b);
-            ret.push_back(a);
-            conecta = false;
-        }
-        else if(i + 2 < info.numberOfTeams){
-            conecta = true;
-            ret.push_back("");
-            ret.push_back("");
-            linhadesc.push_back(ret.size() - 1);
-            ret.push_back("");
-        }
-    }
-    for(const string &linha : ret){
-        maiorlinha = max(maiorlinha, (int)linha.size());
-    }
-    for(string &linha : ret){
-        while(linha.size() < maiorlinha){
-            linha += " ";
-        }
-    }
-    for(int i = 0; i < ret.size(); i++){
-        if(ret[i][ret[i].size() - 1] == '-'){
-             i -= 2;
-                vector<string> match = gerarpartida(info.vencedores[winners], info.vencedores[winners + 1], maior, info.jogos[(info.numberOfTeams/2) + ((winners + 1)/2)]);
-                winners += 2;
-                for(const string &linha : match){
-                    ret[i] += linha;
-                    i++;
-                }
-        }
-    }
-    //f primeira parte da geração foi feita.
-    if(info.numberOfTeams == (int)4) return ret;
-    queue<int> linhadonovobracket;
-    for(int i = 0; i < ret.size(); i++){
-        if(ret[i][ret[i].size() - 1] == '-'){
-            linhadonovobracket.push(i);
-        }
-    }
-    vector<vector<int>> encontros(calcularRodadas(info.numberOfTeams));
-    int cnt = 0;
-    while(linhadesc.size() != 1){
-        for(int i = 0; i < linhadesc.size(); i++){
-            encontros[cnt].push_back(linhadesc[i]);
-            linhadesc.erase(linhadesc.begin() + i);
-        }
-        cnt++;
-    }
-    encontros[cnt].push_back(linhadesc[0]);
-
-    queue<int> lines;
-    for(int &x: encontros[0]){
-        lines.push(x);
-    }
-    int point = 1;
-    int dist;
-    while(!lines.empty()){
-        for(string &linha : ret){
-            maiorlinha = max(maiorlinha, (int)linha.size());
-        }
-        for(string &linha : ret){
-            while(linha.size() < maiorlinha){
-                linha += " ";
-            }
-        }
-        queue<int> auxiliar = lines, auxiliar2 = lines;
-        for(int i = 0; i < ret.size(); i++){
-            if(i == lines.front()){
-                while(ret[i].size() < maiorlinha + 13){
-                    ret[i] += "-";
-                }
-                lines.pop();
-            }
-            if(i == 0) dist = lines.front() - auxiliar.front() - 5;
-        }
-
-        for(string &linha : ret){
-            maiorlinha = max(maiorlinha, (int)linha.size());
-        }
-
-         for(string &linha : ret){
-            while(linha.size() < maiorlinha){
-                linha += " ";
-            }
-        }
-
-        for(int i = 0; i < ret.size(); i++){
-            if(i == auxiliar.front()){
-                i -= 2;
-                vector<string> match = gerarpartida(info.vencedores[winners], info.vencedores[winners + 1], maior, info.jogos[(info.numberOfTeams/2) + ((winners + 1)/2)]);
-                winners += 2;
-                for(const string &linha : match){
-                    ret[i] += linha;
-                    i++;
-                }
-                if(info.numberOfTeams == 4) break;
-                auxiliar.pop();
-            }
-        }
-        bool next = true;
-        vector<pair<int, int>> intervalo;
-        for(int i = 0; i < ret.size(); i++){
-            if(i == auxiliar2.front()){
-                int linhaatual = i + 3;
-                if(next){
-                    intervalo.push_back({linhaatual, linhaatual+dist});
-                    next = false;
-                    auxiliar2.pop();
-                }
-                else{
-                    next = true;
-                    auxiliar2.pop();
-                }
-            }
-        }
-        /*for(auto x : intervalo){
-            //fazer o negocio da barra vertical
-            int mai = max(x.first, x.second), men = min(x.first, x.second);
-            cout << x.first << " " << x.second << "\n";
-            for(int i = men-2; i <= mai+3; i++){
-                ret[i] += centerstr((maior + 6)/2);
-                ret[i] += '|';
-            }
-        }
-        cout << intervalo.size() << "\n";*/
-
-        lines = queue<int>();
-        for(int x : encontros[point]){
-            lines.push(x);
-        }
-        point++;
-
-    }
-
-    return ret;
-}
-// TODO:
-// Corrigir alinhamento das barras verticais das fases seguintes.
-// Estrutura do bracket já funciona.
-
-int saudartorneiomm(){
-    system("cls");
-    string center = centerstr(65);
-    cout << center << "[][][] [][][] []  [] [][][] []  [] [][][] []  [] [][][] []  [] [][][]\n";
-    cout << center << "  []   []  [] []  [] []  [] []] [] []  [] [][][] []     []] []   []\n";
-    cout << center << "  []   []  [] []  [] [][]   [][][] [][][] [][][] [][][] [][][]   []\n";
-    cout << center << "  []   []  [] []  [] []  [] [] [[] []  [] []  [] []     [] [[]   []\n";
-    cout << center << "  []   [][][] [][][] []  [] []  [] []  [] []  [] [][][] []  []   []\n";
-    cout << center << "====================================================================\n";
-    cout << center << "Selecione a quantia de times desejada: \n";
-    cout << center << "    |   4[1]   |   8[2]   |   16[3]   |   32[4]   |   64[5]   |\n";
-    cout << center << "\n\n";
-    cout << center << "--------------------------------------------------------------------\n";
-    int ret; 
-    cout << center << "Decisao: "; cin >> ret;
-    system("cls");
-    if(ret >= 1 && ret <= 5) return 1*(pow(2,(ret+1)));
-    return 4;
-
 
 }
+/*
+TERMINAR
+*/
 
-void showbracket(const vector<string> &ret){
-    system("cls");
-    for(const string &x : ret){
-        cout << x << "\n";
-    }
-}
+resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa, bool mata_mata){
+    resultado placar_final;
+    placar_final.t1 = time1;
+    placar_final.t2 = time2;
+    string match_started = "MATCH EVENTS";
+    vector<string> eventos;
+    string bar = repeat("-", 50);
+    string frase_inicio = addbar(match_started, (int)32);
+    string space = repeat(" ", 261);
+    eventos.push_back(space);
+    eventos.push_back(centerstr(bar, 261));
+    bar = repeat("-", 30);
+    eventos.push_back(centerstr(addbar(frase_inicio, 52), 261));
+    eventos.push_back(centerstr(addbar(bar, 52), 261));
+    bar = repeat("-", 50);
+    string ax = "";
+    eventos.push_back(centerstr(addbar(ax, 52), 261));
 
-clube torneio_mata_mata(infotorneio &info){
-    inicializarTorneio(info, saudartorneiomm());
-    string delay;
-    int jogos_da_rodada = info.numberOfTeams/2;
-    int i = 0;
-   
-        showbracket(gerarbracket(info)); 
-        cin >> Stopatscreen;
-        for(int j = 0; j < (jogos_da_rodada*2); j += 2){
-            info.jogos[i] = simularPartida(info.teams[j], info.teams[j + 1], false, true);
-            cin >> delay;
-            if(info.jogos[i].goals1 > info.jogos[i].goals2 || info.jogos[i].penalties1 > info.jogos[i].penalties2) info.vencedores[i] = info.teams[j];
-            else info.vencedores[i] = info.teams[j+1];
-            if(info.jogos[i].penalties1 + info.jogos[i].penalties2){
-                info.jogos[i].goals1 += info.jogos[i].penalties1;
-                info.jogos[i].goals2 += info.jogos[i].penalties2;
-            }
-            i++;
-        }
-        jogos_da_rodada /= 2;
-        int vencedor = 0;
-        while(jogos_da_rodada != 1){
-            showbracket(gerarbracket(info)); 
-            showbracket(gerarbracket(info)); 
-            showbracket(gerarbracket(info)); 
-            showbracket(gerarbracket(info)); 
-            showbracket(gerarbracket(info)); 
-            showbracket(gerarbracket(info)); 
-            cin >> Stopatscreen;
+    int acrecimos = aleatorio(0,8);
 
-            for(int j = 0; j < jogos_da_rodada*2; j++){
-                info.jogos[i] = simularPartida(info.vencedores[vencedor], info.vencedores[vencedor + 1], false, true);
-                cin >> delay;
-                if(info.jogos[i].goals1 > info.jogos[i].goals2 || info.jogos[i].penalties1 > info.jogos[i].penalties2) info.vencedores[i] = info.vencedores[vencedor];
-                else info.vencedores[i] = info.vencedores[vencedor + 1];
-                if(info.jogos[i].penalties1 + info.jogos[i].penalties2){
-                    info.jogos[i].goals1 += info.jogos[i].penalties1;
-                    info.jogos[i].goals2 += info.jogos[i].penalties2;
-                }
-                vencedor += 2;
-                i++;
-            }
-
-            jogos_da_rodada /= 2;
-        }
-        showbracket(gerarbracket(info)); 
-        showbracket(gerarbracket(info)); 
-        showbracket(gerarbracket(info)); 
-        showbracket(gerarbracket(info)); 
-        showbracket(gerarbracket(info)); 
-        showbracket(gerarbracket(info)); 
-        cin >> Stopatscreen;
-
+    for(int i = 0; i <= 90 + acrecimos; i++){
         system("cls");
-        cout << "\n\n\n\n\n\n\n";
-        cout << centerstr(75) << "      [][][] [] []  [] [][][] []     []\n";
-        cout << centerstr(75) << "     []     [] []] [] []  [] []     []\n";
-        cout << centerstr(75) << "    [][][] [] [][][] []  [] []     []\n";
-        cout << centerstr(75) << "   []     [] [] [[] [][][] []\n";
-        cout << centerstr(75) << "  []     [] []  [] []  [] [][][] []\n";
-        cout << centerstr(75) << "====================================\n";
-        Sleep(3000);
-        cout << centerstr(75) << "press any key + enter to continue!\n"; Sleep(5000);
-        system("cls");
+        rendelizarcentro(placar(placar_final, 20), 261);
+        rendelizar(eventos);
+        string minuto = to_string(i) + "'";
+        cout << centerstr(addbar(minuto, 52), 261);
+        Sleep(100);
+        clube favevent = calcularevento(time1, time2);
 
-        info.jogos[info.jogos.size() - 1] = simularPartida(info.vencedores[info.vencedores.size() - 3],info.vencedores[info.vencedores.size() - 2],false, true);
-        cin >> Stopatscreen;
-        showbracket(gerarbracket(info));
-        cin >> Stopatscreen;
-    return info.vencedores[info.vencedores.size() - 1];
+        if(favevent.id == time1.id){
+            int GolsExperados = gx(time1, time2, i);
+            if(fatorcasa) GolsExperados += 3;
+            int converter = aleatorio(1, 100);
+            if(converter <= GolsExperados){
+                placar_final.gols1++;;
+                string frase = minuto + " " + time1.nome + " Scored!";
+                eventos.push_back(centerstr(addbar(frase, 52), 261));
+            }
+        }
+        else{
+            int GolsExperados = gx(time2, time1, i);
+            int converter = aleatorio(1, 100);
+            if(converter <= GolsExperados){
+                placar_final.gols2++;
+                string frase = minuto + " " + time2.nome + " Scored!";
+                eventos.push_back(centerstr(addbar(frase, 52), 261));
+            }
+        }
+        if(i == 90 + acrecimos){
+            eventos.push_back(centerstr(addbar(ax, 52), 261));
+            eventos.push_back(centerstr(bar, 261));
+        }
+        if(i == 45){
+            string t1 = time1.nome, t2 = time2.nome;
+            eventos.push_back(centerstr(addbar(ax, 52), 261));
+            ax = "[HALF TIME : " + abreviar(t1) + " " + to_string(placar_final.gols1) + " x " + to_string(placar_final.gols2) + " " + abreviar(t2) + "]";
+            ax = barstr(ax, 50);
+            eventos.push_back(centerstr(addbar(ax, 52), 261));
+            ax = "";
+            eventos.push_back(centerstr(addbar(ax, 52), 261));
+        }
+        placar_final.melhores_momentos = eventos;
+    }
+    system("cls");
+    rendelizarcentro(placar(placar_final, 20), 261);
+    cout << "\n";
+    rendelizar(eventos);
+    string lixo;
+    cin >> lixo;
+    
+
+    system("cls");
+    return placar_final;
 }
 
 int main(){
-    system("cls");
-    /*resultado result; 
-    result.goals1 = 3;
-    result.goals2 = 0;
-    result.penalties1 = 0;
-    result.penalties2 = 0;
-    result.team1id = 2;
-    result.team2id = 1;
-    showresult(result, 55); */
+    clube time1 = teams[1], time2 = teams[2];
+    resultado r;
+    simular_penaltis(r, time1, time2);
 
-    infotorneio info;
-    clube campeao = torneio_mata_mata(info);
-    cout << centerstr(70) <<  campeao.name << " Venceu!";
 }
