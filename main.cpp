@@ -1,3 +1,4 @@
+//Feito TOTALMENTE SEM IA!!
 #include "Database.cpp"
 
 mt19937 gen(time(nullptr));
@@ -7,7 +8,7 @@ const vector<string> menu_inicial = {"Jogo Rapido", "Torneio", "Configuracoes", 
 
 
 
-//configurações globais:
+//configurações globais(terminar depois).
 int screensize = 261;
 
 
@@ -250,9 +251,7 @@ clube simular_penaltis(resultado &res){
     }
 
 }
-/*
-TERMINAR
-*/
+
 
 resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa, bool mata_mata){
     resultado placar_final;
