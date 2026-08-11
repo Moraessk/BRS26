@@ -117,6 +117,7 @@ vector<string> nivelar(vector<string> frame){
 
     for(string &line : frame){
         int x = line.size();
+        //if(x == maxsize) continue;
         while(x < maxsize){
             line += " ";
             x = line.size();
@@ -125,6 +126,8 @@ vector<string> nivelar(vector<string> frame){
 
     return frame;
 }
+
+
 
 int gx(resultado res, int minute, int ordem){ //0 nao muda e 1 muda
     int g = res.t1.ataque - res.t2.defesa;
@@ -379,7 +382,7 @@ int gerarmenu(vector<string> lista){
     nivelar(menu);
 
     rendelizar(menu);
-    cout << centerstr("[  Decisao  ]:", screensize);
+    cout << centerstr("[  Decisao  ]: ", screensize);
     cin >> ret;
     return ret;
 }
@@ -450,24 +453,33 @@ vector<string> gerarchaveamento(infotorneio& torn){
         }
         else if(i != torn.qtd_equipes-2){
             conect = true;
-            future_conections.push_back(chaveamento.size() - 1);
+            future_conections.push_back(chaveamento.size());
             chaveamento.push_back("");
         }
         j++;
     }
     conect = false;
-    nivelar(chaveamento);
+    chaveamento = nivelar(chaveamento);
     
     //Daqui para cima nao mecher! Ta tudo correto (Acabei de Mecher, ferrou td pqp)
 
     // Use o /* para poder usar, essa parte ta incompleta.
-    int gamecont = torn.qtd_equipes/2 - 1;
+     ///*
+    int gamecont = torn.qtd_equipes/2;
+    int fin;
     while(!future_conections.empty()){
         int x = future_conections.size();
         vector<int> atual_conections;
-        for(int i = 0; i < future_conections.size(); i++){
-            atual_conections.push_back(future_conections[i]);
-            future_conections.erase(future_conections.begin() + i);
+        if(x == 1){
+            atual_conections.push_back(future_conections[0]);
+            fin = future_conections[0];
+            future_conections.pop_back();
+        }
+        else{
+            for(int i = 0; i < future_conections.size(); i++){
+                atual_conections.push_back(future_conections[i]);
+                future_conections.erase(future_conections.begin() + i);
+            }
         }
         //Temos EXATAMENTE os pontos de onde botar os braquetes nesse nivelamento kk;
 
@@ -484,25 +496,37 @@ vector<string> gerarchaveamento(infotorneio& torn){
                 }
                 conect = !conect;
             }
-            else{
-                if(conect) chaveamento[i] += (bar + "|");
-                else chaveamento[i] += (bar);
-            }
+            if(conect && chaveamento[i+1][chaveamento[i].size()-1] != '-' && chaveamento[i+2][chaveamento[i].size()-1] != '-') chaveamento[i] += (bar + "|");
         }
 
         for(int& line : atual_conections){
             chaveamento[line] += bar1;
         }
-        nivelar(chaveamento);
+        chaveamento = nivelar(chaveamento);
+        gamecont++;
     }
+     //*/
+
+     resultado res = torn.jogos[gamecont]; 
+    fin -= 2;
+    vector<string> add = placar(res, buttonsize);
+    for(string& a : add){
+        chaveamento[fin] += a;
+        fin++;
+    }
+    chaveamento = nivelar(chaveamento);
+
 
     return chaveamento;
 }
 
 int main(){
-     infotorneio torn;
+    system("cls");
+    infotorneio torn;
     init_tournament(torn);
     vector<string> chaveamento = gerarchaveamento(torn);
     cout << "\n";
     rendelizar(chaveamento);
+    
+
 }
