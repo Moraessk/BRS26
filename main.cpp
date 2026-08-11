@@ -10,15 +10,29 @@ const vector<string> menu_inicial = {"Jogo Rapido", "Torneio", "Configuracoes", 
 
 //configurações globais(terminar depois).
 int screensize = 261;
+int buttonsize = 30;
 
 
 
 
 struct resultado{
     int gols1 = 0, gols2 = 0, golspenalti1 = 0, golspenalti2 = 0;
-    clube t1, t2, vencedor;
-    vector<string> melhores_momentos;
+    clube t1 = {}, t2 = {}, vencedor = {};
+    vector<string> melhores_momentos = {};
 };
+
+struct infotorneio{
+    int qtd_equipes;
+    vector<clube> equipes;
+    vector<clube> vencedor;
+    vector<resultado> jogos;
+};
+
+void embaralhar(vector<clube>& a){
+    for(int i = 0; i < 90; i++){
+        shuffle(a.begin(), a.end(), gen);
+    }
+}
 
 string centerstr(const string &a, const int &screensize){ //Tamanho da tela: screensize caracters
     int tamanho = a.size();
@@ -381,18 +395,63 @@ int selecionartime(){
     }
     system("cls");
     int nx = gerarmenu(equipes);
+    system("cls");
     idret = num + nx;
 
     return idret;
 }
 
-int main(){
-    /*int fluxo_de_menu = gerarmenu(menu_inicial);
+void init_tournament(infotorneio& info){
+    vector<string> options = {"4 times", "8 times", "16 times", "32 times", "64 times"};
+    cout << "\n\n\n";
+    info.qtd_equipes = gerarmenu(options);
     system("cls");
-    if(fluxo_de_menu == 1){
+    info.qtd_equipes = (int)(pow(2, (info.qtd_equipes+1)));
 
+    vector<clube> tournament_teams(info.qtd_equipes, {"", 0, 0, 0, -1}); //Inicializa todos os times com status zerados e com id -1 (o 0 é o World class!), é só para nao dar B.O.
+    info.equipes = tournament_teams;
+
+    vector<resultado> jg(info.qtd_equipes - 1);
+    info.jogos = jg;
+    vector<clube> winners((info.qtd_equipes/2) - 1, {"", 0, 0, 0, -1});
+    for(clube& eqp : info.equipes){
+        int ID = selecionartime();
+        eqp = teams[ID];
     }
-    */
-   cout << selecionartime();
+    embaralhar(info.equipes);
+}
+
+void gerarchaveamento(infotorneio& torn){
+    int div = 1;
+    vector<string> chaveamento;
+    queue<int> future_conections;
+    bool conect = true;
+    for(int i = 0; i < torn.qtd_equipes; i += 2*div){
+        resultado res;
+        res.t1 = torn.equipes[i];
+        res.t2 = torn.equipes[i+1];
+        vector<string> add = placar(res, buttonsize);
+        
+        for(string& a : add){
+            chaveamento.push_back(a);
+        }
+        string bar = "";
+        for(int i = 0; i < buttonsize/2; i++) bar += " ";
+        if(conect){ 
+            chaveamento.push_back(bar + "|");
+            conect = false;
+        }
+        else{
+            conect = true;
+            chaveamento.push_back("");
+            future_conections.push(chavemento.size());
+        }
+    }
+    div*=2;
+}
+
+int main(){
+    infotorneio torn;
+    init_tournament(torn);
 
 }
