@@ -4,6 +4,8 @@
 #include <iostream>
 #include <random>
 #include <chrono>
+#include <algorithm>
+#include <queue>
 #include <Windows.h>
 using namespace std;
 
