@@ -413,45 +413,96 @@ void init_tournament(infotorneio& info){
 
     vector<resultado> jg(info.qtd_equipes - 1);
     info.jogos = jg;
+
     vector<clube> winners((info.qtd_equipes/2) - 1, {"", 0, 0, 0, -1});
     for(clube& eqp : info.equipes){
         int ID = selecionartime();
         eqp = teams[ID];
     }
     embaralhar(info.equipes);
+     for(int k = 0; k < info.qtd_equipes; k += 2){
+        info.jogos[k/2].t1 = info.equipes[k];
+        info.jogos[k/2].t2 = info.equipes[k+1];
+    }
 }
 
-void gerarchaveamento(infotorneio& torn){
-    int div = 1;
+vector<string> gerarchaveamento(infotorneio& torn){
     vector<string> chaveamento;
-    queue<int> future_conections;
+    vector<int> future_conections;
     bool conect = true;
-    for(int i = 0; i < torn.qtd_equipes; i += 2*div){
-        resultado res;
-        res.t1 = torn.equipes[i];
-        res.t2 = torn.equipes[i+1];
+    int j = 0;
+
+    string bar1 = "";
+    for(int i = 0; i < buttonsize; i++) bar1 += "-";
+    string bar = "";
+    for(int i = 0; i < buttonsize/2; i++) bar += " ";
+
+    for(int i = 0; i < torn.qtd_equipes; i += 2){
+        resultado res = torn.jogos[j];
         vector<string> add = placar(res, buttonsize);
         
         for(string& a : add){
             chaveamento.push_back(a);
         }
-        string bar = "";
-        for(int i = 0; i < buttonsize/2; i++) bar += " ";
         if(conect){ 
-            chaveamento.push_back(bar + "|");
+            chaveamento.push_back(bar + "|" + bar1);
             conect = false;
         }
-        else{
+        else if(i != torn.qtd_equipes-2){
             conect = true;
+            future_conections.push_back(chaveamento.size() - 1);
             chaveamento.push_back("");
-            future_conections.push(chavemento.size());
         }
+        j++;
     }
-    div*=2;
+    conect = false;
+    nivelar(chaveamento);
+    
+    //Daqui para cima nao mecher! Ta tudo correto (Acabei de Mecher, ferrou td pqp)
+
+    // Use o /* para poder usar, essa parte ta incompleta.
+    int gamecont = torn.qtd_equipes/2 - 1;
+    while(!future_conections.empty()){
+        int x = future_conections.size();
+        vector<int> atual_conections;
+        for(int i = 0; i < future_conections.size(); i++){
+            atual_conections.push_back(future_conections[i]);
+            future_conections.erase(future_conections.begin() + i);
+        }
+        //Temos EXATAMENTE os pontos de onde botar os braquetes nesse nivelamento kk;
+
+        x = chaveamento.size();
+
+        for(int i = 0; i < x; i++){
+            if(chaveamento[i][chaveamento[i].size()-1] == '-'){
+                resultado res = torn.jogos[gamecont]; 
+                i -= 2;
+                vector<string> add = placar(res, buttonsize);
+                for(string& a : add){
+                    chaveamento[i] += a;
+                    i++;
+                }
+                conect = !conect;
+            }
+            else{
+                if(conect) chaveamento[i] += (bar + "|");
+                else chaveamento[i] += (bar);
+            }
+        }
+
+        for(int& line : atual_conections){
+            chaveamento[line] += bar1;
+        }
+        nivelar(chaveamento);
+    }
+
+    return chaveamento;
 }
 
 int main(){
-    infotorneio torn;
+     infotorneio torn;
     init_tournament(torn);
-
+    vector<string> chaveamento = gerarchaveamento(torn);
+    cout << "\n";
+    rendelizar(chaveamento);
 }
