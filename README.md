@@ -24,11 +24,11 @@
 </p>
 <p align="center">- Tentei simular os fenomenos de uma partida e a decisao de penaltis vendo penalti a penalti.</p>
 <br>
-<h3 align="center">Chaveamento (Feito por algiritimo!)</h3>
+<h3 align="center">Chaveamento (Talvez o Principal)</h3>
 <p align="center">
     <img src="Imagens/Chaveamento.png" width="800">
 </p>
-<p align="center">- Criei uma especie de "Geometria usando ASCII pois isso faz altomaticamente todos os chaveamentos de 2 ao 1024 sla. Tranquilamente a parte mais demorada do algoritimo inteiro.</p>
+<p align="center">- Criei uma especie de "Algoritimo de Geometria usando ASCII" pois isso faz altomaticamente todos os chaveamentos de 2 ao maior que a tela aguentar. Tranquilamente a parte mais demorada do algoritimo inteiro.</p>
 
 <h3 align="center">Menu Inicial</h3>
 <p align="center">
