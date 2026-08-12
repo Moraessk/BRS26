@@ -6,3 +6,33 @@
 <p>- Modo Torneio.</p>
 <p>- Modo Liga.</p>
 <p>- Configurações Globais.</p>
+
+
+<br>
+<h2 align="center">Gameplay</h2>
+<br>
+<h3 align="center">Ligas (Apenas 1º Divisão)</h3>
+<p align="center">
+    <img src="Imagens/Leagues_QuickMatch.png" width="800">
+</p>
+<p align="center">- Todas as ligas + Seleções do nosso jogo!.</p>
+
+<br>
+<h3 align="center">Gameplay de Simulação com Penaltis</h3>
+<p align="center">
+    <img src="Imagens/Simulacao.png" width="800">
+</p>
+<p align="center">- Tentei simular os fenomenos de uma partida e a decisao de penaltis vendo penalti a penalti.</p>
+<br>
+<h3 align="center">Chaveamento (Feito por algiritimo!)</h3>
+<p align="center">
+    <img src="Imagens/Chaveamento.png" width="800">
+</p>
+<p align="center">- Criei uma especie de "Geometria usando ASCII pois isso faz altomaticamente todos os chaveamentos de 2 ao 1024 sla. Tranquilamente a parte mais demorada do algoritimo inteiro.</p>
+
+<h3 align="center">Menu Inicial</h3>
+<p align="center">
+    <img src="Imagens/Leagues_QuickMatch.png" width="800">
+</p>
+
+
