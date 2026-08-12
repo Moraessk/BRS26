@@ -4,7 +4,7 @@
 
 mt19937 gen(time(nullptr));
 
-const vector<string> leagues = {"Brasileirao", "Bundesliga", "Eredivise", "LaLiga", "Liga MX", "Liga NOS", "League ONE", "LPF", "MLS", "Premier League", "Serie A", "Saudi Pro League", "Internacional FIFA", "Voltar"};
+const vector<string> leagues = {"Brasileirao", "Bundesliga", "Eredivise", "LaLiga", "Liga MX", "Liga NOS", "League ONE", "LPF", "MLS", "Premier League", "Serie A", "Saudi Pro League", "Internacional FIFA"};
 
 
 
@@ -24,7 +24,6 @@ struct resultado{
 struct infotorneio{
     int qtd_equipes;
     vector<clube> equipes;
-    vector<clube> vencedor;
     vector<resultado> jogos;
 };
 
@@ -342,6 +341,12 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
     rendelizarcentro(placar(placar_final, buttonsize), screensize);
     cout << "\n";
     rendelizar(placar_final.melhores_momentos);
+    if(placar_final.gols1 > placar_final.gols2) placar_final.vencedor = placar_final.t1;
+    else if(placar_final.gols1 < placar_final.gols2) placar_final.vencedor = placar_final.t2;
+    else if(mata_mata){
+        if(placar_final.golspenalti1 > placar_final.golspenalti2) placar_final.vencedor = placar_final.t1;
+        else placar_final.vencedor = placar_final.t2;
+    }
     string lixo;
     cin >> lixo;
     
@@ -420,22 +425,17 @@ void init_tournament(infotorneio& info){
     vector<clube> tournament_teams(info.qtd_equipes, {"", 0, 0, 0, -1}); //Inicializa todos os times com status zerados e com id -1 (o 0 é o World class!), é só para nao dar B.O.
     info.equipes = tournament_teams;
 
-    vector<resultado> jg(info.qtd_equipes - 1);
+    vector<resultado> jg(500);
     info.jogos = jg;
 
-    vector<clube> winners((info.qtd_equipes/2) - 1, {"", 0, 0, 0, -1});
-    info.vencedor = winners;
-    for(int i = 0; i < (info.qtd_equipes/2) - 1; i++){
-        info.vencedor[i].nome = "v" + to_string(i);
-    }
     for(clube& eqp : info.equipes){
         int ID = selecionartime();
         eqp = teams[ID];
     }
     embaralhar(info.equipes);
      for(int k = 0; k < info.qtd_equipes; k += 2){
-        info.jogos[k/2].t1 = info.equipes[k];
-        info.jogos[k/2].t2 = info.equipes[k+1];
+        //info.jogos[k/2].t1 = info.equipes[k];
+        info.jogos[k/2] = {0,0,0,0,info.equipes[k],info.equipes[k+1]}; 
     }
     
 
@@ -477,7 +477,7 @@ vector<string> gerarchaveamento(infotorneio& torn){
 
     // Use o /* para poder usar, essa parte ta incompleta.
      ///*
-    int gamecont = torn.qtd_equipes/2;
+    int gamecont = j;
     int fin;
     while(!future_conections.empty()){
         int x = future_conections.size();
@@ -506,6 +506,7 @@ vector<string> gerarchaveamento(infotorneio& torn){
                     chaveamento[i] += a;
                     i++;
                 }
+                gamecont++;
                 conect = !conect;
             }
             if(conect && chaveamento[i+1][chaveamento[i].size()-1] != '-' && chaveamento[i+2][chaveamento[i].size()-1] != '-') chaveamento[i] += (bar + "|");
@@ -515,7 +516,6 @@ vector<string> gerarchaveamento(infotorneio& torn){
             chaveamento[line] += bar1;
         }
         chaveamento = nivelar(chaveamento);
-        gamecont++;
     }
      //*/
 
@@ -550,6 +550,29 @@ vector<string> title(vector<string>& ASCII){
     titulo.push_back("");
     return titulo;
     
+}
+
+void simularcopa(infotorneio &info){
+    int matchcont = info.qtd_equipes/2;
+    int roundgames = matchcont;
+    init_tournament(info);
+    vector<string> chaveamento = gerarchaveamento(info);
+    rendelizarcentro(title(tournament_logo), screensize);
+    rendelizar(chaveamento);
+    string lixo;
+    cin >> lixo;
+    system("cls");
+    for(int i = 0; i < roundgames; i+= 2){
+        resultado r1, r2;
+        r1 = simular_partida(info.jogos[i].t1, info.jogos[i].t2, false, true);
+        r2 = simular_partida(info.jogos[i+1].t1, info.jogos[i+1].t2, false, true);
+        info.jogos[matchcont + (i/2)].t1 = r1.vencedor;
+        info.jogos[matchcont + (i/2)].t2 = r2.vencedor;
+    }
+     system("cls");
+    chaveamento = gerarchaveamento(info);
+    rendelizarcentro(title(tournament_logo), screensize);
+    rendelizar(chaveamento);
 }
 
 int main(){
@@ -594,12 +617,13 @@ int main(){
             rendelizarcentro(title(QuickMatch_logo), screensize);
         }
         else if(fluxo_menu == 2){
-            rendelizarcentro(title(tournament_logo), screensize);
-            Sleep(10000);
+            infotorneio info;
+            simularcopa(info);
             // fazer amanha.
         }
         else if(fluxo_menu == 3){
             // fazer amanha.
+            rendelizarcentro(title(settings_logo), screensize);
             const vector<string> settings_menu = {"Buttons Resize", "Match Speed", "ScreenSize", "Voltar"};
             fluxo_menu = gerarmenu(settings_menu);
             if(fluxo_menu == 1){
@@ -622,11 +646,4 @@ int main(){
             fluxo_menu = -1;
         }
     }while(fluxo_menu != -1);
-    
-
-    /*infotorneio info;
-    init_tournament(info);
-    vector<string> chaveamento = gerarchaveamento(info);
-    rendelizar(chaveamento);
-    */
 }
