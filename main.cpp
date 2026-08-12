@@ -1,10 +1,10 @@
 //Feito TOTALMENTE SEM IA!!
 #include "Database.cpp"
+#include "ASCII.cpp"
 
 mt19937 gen(time(nullptr));
 
 const vector<string> leagues = {"Brasileirao", "Bundesliga", "Eredivise", "LaLiga", "Liga MX", "Liga NOS", "League ONE", "LPF", "MLS", "Premier League", "Serie A", "Saudi Pro League", "Internacional FIFA", "Voltar"};
-const vector<string> menu_inicial = {"Jogo Rapido", "Torneio", "Configuracoes", "Sair"};
 
 
 
@@ -292,7 +292,7 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
 
     for(int i = 0; i <= 90 + acrecimos; i++){
         system("cls");
-        rendelizarcentro(placar(placar_final, 20), screensize);
+        rendelizarcentro(placar(placar_final, buttonsize), screensize);
         rendelizar(eventos);
         string minuto = to_string(i) + "'";
         if(i > 90) minuto = "90' + " + to_string(i - 90);
@@ -339,7 +339,7 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
     if(mata_mata && placar_final.gols1 == placar_final.gols2){
         placar_final.vencedor = simular_penaltis(placar_final);
     }
-    rendelizarcentro(placar(placar_final, 20), screensize);
+    rendelizarcentro(placar(placar_final, buttonsize), screensize);
     cout << "\n";
     rendelizar(placar_final.melhores_momentos);
     string lixo;
@@ -351,39 +351,45 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
 }
 
 int gerarmenu(vector<string> lista){
-    vector<string> menu;
     int ret;
-    int maior = 50;
-    for(const string &x : lista){
-        int num = x.size();
-        maior = max(num, maior);
-    }
-    string bar = repeat("-", maior);
-    string div = addbar(bar, maior + 2);
-    
-    menu.push_back(centerstr(bar, screensize));
-    for(string x : lista){
-        menu.push_back(centerstr(div, screensize));
-        menu.push_back(centerstr(addbar(x, maior + 2), screensize));
-    }
-    menu.erase(menu.begin() + 1);
-    menu.push_back(centerstr(bar, screensize));
-    nivelar(menu);
-    
-    int cont = 1;
-    int percorrer = menu.size();
-    for(int i = 0; i < percorrer; i++){
-        if(i%2){
-            menu[i] += " [" + to_string(cont) + "]";
-            cont++;
+    bool correct = false;
+    while(!correct){
+        vector<string> menu;
+        int maior = 50;
+        for(const string &x : lista){
+            int num = x.size();
+            maior = max(num, maior);
         }
+        string bar = repeat("-", maior);
+        string div = addbar(bar, maior + 2);
+    
+        menu.push_back(centerstr(bar, screensize));
+        for(string x : lista){
+            menu.push_back(centerstr(div, screensize));
+            menu.push_back(centerstr(addbar(x, maior + 2), screensize));
+        }
+        menu.erase(menu.begin() + 1);
+        menu.push_back(centerstr(bar, screensize));
+        nivelar(menu);
+    
+        int cont = 1;
+        int percorrer = menu.size();
+        for(int i = 0; i < percorrer; i++){
+            if(i%2){
+                menu[i] += " [" + to_string(cont) + "]";
+                cont++;
+            }
+        }
+
+        nivelar(menu);
+
+        rendelizar(menu);
+        cout << centerstr("[  Decisao  ]: ", screensize);
+        cin >> ret;
+        system("cls");
+        if(ret >= 1 && ret < cont) correct = !correct;
+        else{ cout << "INVALID DECISION! TRY AGAIN!\n\n"; }
     }
-
-    nivelar(menu);
-
-    rendelizar(menu);
-    cout << centerstr("[  Decisao  ]: ", screensize);
-    cin >> ret;
     return ret;
 }
 
@@ -418,6 +424,10 @@ void init_tournament(infotorneio& info){
     info.jogos = jg;
 
     vector<clube> winners((info.qtd_equipes/2) - 1, {"", 0, 0, 0, -1});
+    info.vencedor = winners;
+    for(int i = 0; i < (info.qtd_equipes/2) - 1; i++){
+        info.vencedor[i].nome = "v" + to_string(i);
+    }
     for(clube& eqp : info.equipes){
         int ID = selecionartime();
         eqp = teams[ID];
@@ -427,6 +437,8 @@ void init_tournament(infotorneio& info){
         info.jogos[k/2].t1 = info.equipes[k];
         info.jogos[k/2].t2 = info.equipes[k+1];
     }
+    
+
 }
 
 vector<string> gerarchaveamento(infotorneio& torn){
@@ -520,13 +532,101 @@ vector<string> gerarchaveamento(infotorneio& torn){
     return chaveamento;
 }
 
+vector<string> title(vector<string>& ASCII){
+    vector<string> titulo;
+    string bar = "";
+    for(int i = 0; i < screensize; i++){
+        bar += "=";
+    }
+    titulo.push_back(bar);
+    for(string& x : ASCII){
+        titulo.push_back(x);
+    }
+    titulo.push_back(bar);
+    titulo.push_back("");
+    titulo.push_back("");
+    titulo.push_back("");
+    titulo.push_back("");
+    titulo.push_back("");
+    return titulo;
+    
+}
+
 int main(){
-    system("cls");
-    infotorneio torn;
-    init_tournament(torn);
-    vector<string> chaveamento = gerarchaveamento(torn);
-    cout << "\n";
-    rendelizar(chaveamento);
+    //A main vai servir como fluxo de menus!
+    
+    const vector<string> menu_inicial = {"Jogo Rapido", "Torneio", "Configuracoes", "Sair"};
+    int fluxo_menu = 1;
+    //gamestart:
+    do{
+        system("cls");
+        cout << "\n\n";
+        rendelizarcentro(title(game_logo), screensize);
+        fluxo_menu = gerarmenu(menu_inicial);
+        if(fluxo_menu == 1){
+            const vector<string> menu_quickmatch = {"Partida Normal", "Mata-Mata", "Fator Casa","F.Casa + Mata-Mata","Voltar"};
+            rendelizarcentro(title(QuickMatch_logo), screensize);
+            fluxo_menu = gerarmenu(menu_quickmatch);
+            bool Mt_Mt = false;
+            bool F_C = false;
+            if(fluxo_menu == 2){
+                Mt_Mt = true;
+            }
+            else if(fluxo_menu == 3){
+                F_C = true;
+            }
+            else if(fluxo_menu == 4){
+                F_C = true;
+                Mt_Mt = true;
+            }
+            else if(fluxo_menu == 5){
+                continue;
+            }
+
+            system("cls");
+            rendelizarcentro(title(QuickMatch_logo), screensize);
+            clube team1 = teams[selecionartime()];
+            system("cls");
+            rendelizarcentro(title(QuickMatch_logo), screensize);
+            clube team2 = teams[selecionartime()];
+            system("cls");
+            simular_partida(team1, team2, F_C, Mt_Mt);
+            rendelizarcentro(title(QuickMatch_logo), screensize);
+        }
+        else if(fluxo_menu == 2){
+            rendelizarcentro(title(tournament_logo), screensize);
+            Sleep(10000);
+            // fazer amanha.
+        }
+        else if(fluxo_menu == 3){
+            // fazer amanha.
+            const vector<string> settings_menu = {"Buttons Resize", "Match Speed", "ScreenSize", "Voltar"};
+            fluxo_menu = gerarmenu(settings_menu);
+            if(fluxo_menu == 1){
+
+            }
+            else if(fluxo_menu == 2){
+
+            }
+            else if(fluxo_menu == 3){
+
+            }
+            else{
+                continue;
+            }
+
+        }
+        else{
+            system("cls");
+            cout << "You leaved here with sucess! Thanks For playing!.";
+            fluxo_menu = -1;
+        }
+    }while(fluxo_menu != -1);
     
 
+    /*infotorneio info;
+    init_tournament(info);
+    vector<string> chaveamento = gerarchaveamento(info);
+    rendelizar(chaveamento);
+    */
 }
