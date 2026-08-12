@@ -74,6 +74,12 @@ std::vector<clube> teams = {
     {"Al-Hilal", 79, 81, 83, 221}, {"Al-Ahli", 79, 80, 81, 222}, {"Al-Nassr", 79, 84, 86, 223}, {"Al-Ittihad", 78, 81, 82, 224}, {"Al-Qadsiah", 75, 79, 80, 225}, {"NEOM SC", 72, 75, 77, 226}, 
     {"Al-Shabab", 70, 72, 73, 227}, {"Al-Ettifaq", 68, 70, 71, 228}, {"Al-Taawoun", 68, 69, 70, 229}, {"Al-Khaleej", 66, 67, 69, 230}, {"Al-Fayha", 66, 67, 68, 231}, {"Al-Kholood", 64, 66, 68, 232}, 
     {"Al-Diriyah", 64, 66, 67, 233}, {"Al-Fateh", 63, 65, 67, 234}, {"Al-Faisaly", 63, 65, 66, 235}, {"Abha", 63, 65, 66, 236}, {"Al-Riyadh", 62, 64, 66, 237}, {"Al-Hazem", 62, 64, 66, 238}, 
-    {"NA", 0, 0, 0, 239}, {"NA", 0, 0, 0, 240}
+    {"NA", 0, 0, 0, 239}, {"NA", 0, 0, 0, 240},
+
+    //Internacional FIFA.
+    {"Spain", 88, 92, 94, 241}, {"Argentina", 86, 91, 92, 242}, {"France", 87, 90, 93, 243}, {"England", 85, 89, 90, 244}, {"Brazil", 84, 88, 91, 245}, {"Portugal", 83, 87, 89, 246},
+    {"Netherlands", 82, 85, 87, 247}, {"Germany", 82, 85, 86, 248}, {"Belgium", 80, 83, 85, 249}, {"Italy", 80, 82, 84, 250}, {"Colombia", 79, 83, 85, 251}, {"Croatia", 79, 81, 82, 252},
+    {"Morocco", 78, 81, 83, 253}, {"Uruguay", 78, 82, 83, 254}, {"Japan", 76, 79, 81, 255}, {"Switzerland", 77, 79, 80, 256}, {"Denmark", 76, 79, 80, 257}, {"Senegal", 76, 80, 82, 258},
+    {"Mexico", 75, 78, 80, 259}, {"United States", 73, 77, 79, 260}
     //Borussia Monchengladbach é o time com + caracteries 26 no total.
 };
