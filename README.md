@@ -28,7 +28,7 @@
 <p align="center">
     <img src="Imagens/Chaveamento.png" width="800">
 </p>
-<p align="center">- Criei uma especie de "Algoritimo de Geometria usando ASCII" pois isso faz altomaticamente todos os chaveamentos de 2 ao maior que a tela aguentar. Tranquilamente a parte mais demorada do algoritimo inteiro.</p>
+<p align="center">- Criei uma especie de "Algoritimo de Geometria" usando ASCII pois isso faz automaticamente todos os chaveamentos de 2 ao maior que a tela aguentar. Tranquilamente a parte mais demorada do algoritimo inteiro.</p>
 
 <h3 align="center">Menu Inicial</h3>
 <p align="center">
