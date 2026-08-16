@@ -91,3 +91,27 @@ vector<string> settings_logo = {
  #############             ####  #####   #     #   ##### #  ## ##### ####  
  ###  ###  ###                                                            
 */
+
+vector<string> info = {
+    "   Hello! My name is Davi Moraes, i'm a High School studant at the Instituto Federal De Mato-Grosso (Brazil) and this is my first project in C++. I'm making it just because i like, this is why i'm not",
+    "",
+    ""
+};
+
+vector<string> info_logo = {
+
+};
+
+vector<string> winner_logo = {
+    R"(     __________                                                    __________    )",
+    R"(   (____________)                                                (____________)  )",
+    R"(  -|            |-                                              -|            |- )",
+    R"( | |            | |    #   # ##### #   # #   # ##### ####      | |            | |)",
+    R"(  -|            |-     #   #   #   ##  # ##  # #     #   #      -|            |- )",
+    R"(   \____________/      # # #   #   ##### ##### ##### #   #       \____________/  )",
+    R"(        | |            ## ##   #   #  ## #  ## #     ####             | |        )",
+    R"(        | |            #   # ##### #   # #   # ##### #   #            | |        )",
+    R"(     ==========                                                    ==========    )",
+    R"(    |          |                                                  |          |   )",
+    R"(     ----------                                                    ----------    )"
+};
