@@ -19,6 +19,7 @@ struct resultado{
     int gols1 = 0, gols2 = 0, golspenalti1 = 0, golspenalti2 = 0;
     clube t1 = {}, t2 = {}, vencedor = {};
     vector<string> melhores_momentos = {};
+    string resume;
 };
 
 struct infotorneio{
@@ -26,6 +27,26 @@ struct infotorneio{
     vector<clube> equipes;
     vector<resultado> jogos;
 };
+
+vector<string> nivelar(vector<string> frame){
+    int size;
+    int maxsize = frame[0].size();
+    for(string &line : frame){
+        size = line.size();
+        maxsize = max(size, maxsize);
+    }
+
+    for(string &line : frame){
+        int x = line.size();
+        //if(x == maxsize) continue;
+        while(x < maxsize){
+            line += " ";
+            x = line.size();
+        }
+    }
+
+    return frame;
+}
 
 void embaralhar(vector<clube>& a){
     for(int i = 0; i < 90; i++){
@@ -106,39 +127,51 @@ string addbar(string &a, int size){
     return ret;
 }
 
-vector<string> nivelar(vector<string> frame){
-    int size;
-    int maxsize = frame[0].size();
-    for(string &line : frame){
-        size = line.size();
-        maxsize = max(size, maxsize);
-    }
 
-    for(string &line : frame){
-        int x = line.size();
-        //if(x == maxsize) continue;
-        while(x < maxsize){
-            line += " ";
-            x = line.size();
-        }
+void structured_menu(vector<string> lista){
+    int maior = 60;
+    for(string x : lista){
+        int aux = x.size();
+        maior = max(maior, aux);
     }
-
-    return frame;
+    maior += 4;
+    string bar = "";
+    for(string& x : lista){
+        bool kbum = false;
+        if(x.size()%2) kbum = true;;
+        string space = "";
+        int dif = maior - x.size();
+        dif /= 2;
+        for(int i = 0; i < dif; i++) space += " ";
+        x = space + x + space;
+        if(kbum) x.pop_back();
+    }
+    nivelar(lista);
+    maior = lista[0].size();
+    for(int i = 0; i < maior; i++) bar += "-";
+    vector<string> menu;
+    menu.push_back(bar);
+    for(const string& x : lista){
+        menu.push_back("|" + x + "|");
+        menu.push_back(bar);
+    }
+    rendelizarcentro(menu, screensize);
 }
 
 
 
 int gx(resultado res, int minute, int ordem){ //0 nao muda e 1 muda
-    int g = res.t1.ataque - res.t2.defesa;
+    int g = (res.t1.ataque - res.t2.defesa)/2;
     int acumulativo = 1;
     if(ordem) g = res.t2.ataque - res.t1.defesa;
+    int qtdgols = res.gols1 + res.gols2;
+    int dif = abs(res.gols1 - res.gols2);
 
-    if(minute > 85){
-        g += 10;
+    if(minute > 80){
+        g += 5;
     }
     if(g < 1) g = 1;
 
-    int dif = abs(res.gols1 - res.gols2);
     if(dif > 2 && res.gols1 > res.gols2){
         while(dif > 2){
             dif--;
@@ -146,7 +179,8 @@ int gx(resultado res, int minute, int ordem){ //0 nao muda e 1 muda
         }
         g /= acumulativo;
     }
-    if(g > 12) g = 12;
+    if(qtdgols > 5) g /= 3;
+    if(g > 12) g = 10;
     return g;
 }
 
@@ -256,9 +290,8 @@ clube simular_penaltis(resultado &res){
             }
             penaltyRound++;
     }
-    string score = res.t1.nome + " " + to_string(res.gols1) + " [" + to_string(res.golspenalti1) + "] x [" + to_string(res.golspenalti2) + "] " + to_string(res.gols2) + " " + res.t2.nome;
+    res.resume = res.t1.nome + " " + to_string(res.gols1) + " [" + to_string(res.golspenalti1) + "] x [" + to_string(res.golspenalti2) + "] " + to_string(res.gols2) + " " + res.t2.nome;
     res.melhores_momentos.push_back("");
-    res.melhores_momentos.push_back(centerstr(score, screensize));
     if(res.golspenalti1 > res.golspenalti2){
         return res.t1;
     }
@@ -335,6 +368,7 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
         placar_final.melhores_momentos = eventos;
     }
     system("cls");
+    placar_final.resume = time1.nome + " " + to_string(placar_final.gols1) +" x " + to_string(placar_final.gols2) + " " + time2.nome;
     if(mata_mata && placar_final.gols1 == placar_final.gols2){
         placar_final.vencedor = simular_penaltis(placar_final);
     }
@@ -347,6 +381,7 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
         if(placar_final.golspenalti1 > placar_final.golspenalti2) placar_final.vencedor = placar_final.t1;
         else placar_final.vencedor = placar_final.t2;
     }
+    cout << centerstr(placar_final.resume, screensize) << "\n";
     string lixo;
     cin >> lixo;
     
@@ -416,8 +451,30 @@ int selecionartime(){
     return idret;
 }
 
+vector<string> title(vector<string>& ASCII){
+    vector<string> titulo;
+    string bar = "";
+    for(int i = 0; i < screensize; i++){
+        bar += "=";
+    }
+    titulo.push_back(bar);
+    for(string& x : ASCII){
+        titulo.push_back(x);
+    }
+    titulo.push_back(bar);
+    titulo.push_back("");
+    titulo.push_back("");
+    titulo.push_back("");
+    titulo.push_back("");
+    titulo.push_back("");
+    return titulo;
+    
+}
+
 void init_tournament(infotorneio& info){
-    vector<string> options = {"4 times", "8 times", "16 times", "32 times", "64 times"};
+    rendelizarcentro(title(tournament_logo), screensize);
+    vector<string> options = {"4 times", "8 times", "16 times", "32 times"};
+    vector<string> decision = {"Choose Teams", "Random Teams", "National Cup"};
     cout << "\n\n\n";
     info.qtd_equipes = gerarmenu(options);
     system("cls");
@@ -428,10 +485,45 @@ void init_tournament(infotorneio& info){
 
     vector<resultado> jg(500);
     info.jogos = jg;
+    rendelizarcentro(title(tournament_logo), screensize);
+    int decisao = gerarmenu(decision);
 
-    for(clube& eqp : info.equipes){
-        int ID = selecionartime();
-        eqp = teams[ID];
+    if(decisao == 1){
+        for(clube& eqp : info.equipes){
+            int ID = selecionartime();
+            eqp = teams[ID];
+        }
+    }
+    else if(decisao == 2){
+        for(clube& eqp : info.equipes){
+            int ID = aleatorio(1,240);
+            while(teams[ID].id != ID) ID = aleatorio(1,240);
+            eqp = teams[ID];
+        }
+    }
+    else{
+        int liga = gerarmenu(leagues);
+        liga--;
+        int inicio = ((liga*20) + 1), fim = inicio + 19;
+        vector<clube> aux;
+        for(int i = inicio; i <= fim; i++){
+            aux.push_back(teams[i]);
+        }
+        vector<bool> mark(19, false);
+        for(clube& eqp : info.equipes){
+            int ID = aleatorio(0, 19);
+            while(teams[ID].id != ID) ID = aleatorio(0,19);
+            if(info.qtd_equipes <= 16){
+                while(mark[ID]){
+                    int ax = ID;
+                    ID = aleatorio(0, 19);
+                    if(teams[ID].id != ID) ID = ax;
+                }
+                mark[ID] = 1;
+            }
+            eqp = aux[ID];
+        }
+
     }
     embaralhar(info.equipes);
      for(int k = 0; k < info.qtd_equipes; k += 2){
@@ -533,50 +625,77 @@ vector<string> gerarchaveamento(infotorneio& torn){
     return chaveamento;
 }
 
-vector<string> title(vector<string>& ASCII){
-    vector<string> titulo;
-    string bar = "";
-    for(int i = 0; i < screensize; i++){
-        bar += "=";
-    }
-    titulo.push_back(bar);
-    for(string& x : ASCII){
-        titulo.push_back(x);
-    }
-    titulo.push_back(bar);
-    titulo.push_back("");
-    titulo.push_back("");
-    titulo.push_back("");
-    titulo.push_back("");
-    titulo.push_back("");
-    return titulo;
-    
-}
-
 void simularcopa(infotorneio &info){
     init_tournament(info);
     int matchcont = info.qtd_equipes/2;
     int roundgames = matchcont;
+    int gamecont = 0;
+    while(roundgames != 1){
+        vector<string> chaveamento = gerarchaveamento(info);
+        rendelizarcentro(title(tournament_logo), screensize);
+        rendelizar(chaveamento);
+        string lixo;
+        cin >> lixo;
+        system("cls");
+        for(int i = 0; i < roundgames; i += 2){
+            info.jogos[i + gamecont] = simular_partida(info.jogos[i + gamecont].t1, info.jogos[i + gamecont].t2, false, true);
+            info.jogos[i+1 + gamecont] = simular_partida(info.jogos[i+1 + gamecont].t1, info.jogos[i+1 + gamecont].t2, false, true);
+            info.jogos[matchcont + (i/2)].t1 = info.jogos[i + gamecont].vencedor;
+            info.jogos[matchcont + (i/2)].t2 = info.jogos[i+1 + gamecont].vencedor;
+        }
+        roundgames /= 2;
+        gamecont = matchcont;
+        matchcont += roundgames;
+
+        system("cls");
+    };
     vector<string> chaveamento = gerarchaveamento(info);
     rendelizarcentro(title(tournament_logo), screensize);
     rendelizar(chaveamento);
     string lixo;
     cin >> lixo;
-    system("cls");
-    for(int i = 0; i < roundgames; i += 2){
-        info.jogos[i] = simular_partida(info.jogos[i].t1, info.jogos[i].t2, false, true);
-        info.jogos[i+1] = simular_partida(info.jogos[i+1].t1, info.jogos[i+1].t2, false, true);
-        info.jogos[matchcont + (i/2)].t1 = info.jogos[i].vencedor;
-        info.jogos[matchcont + (i/2)].t2 = info.jogos[i+1].vencedor;
-    }
-    roundgames /= 2;
-    matchcont += roundgames;
-
-    system("cls");
+    info.jogos[gamecont] = simular_partida(info.jogos[gamecont].t1, info.jogos[gamecont].t2, false, true);
+    clube winner = info.jogos[gamecont].vencedor; 
     chaveamento = gerarchaveamento(info);
     rendelizarcentro(title(tournament_logo), screensize);
     rendelizar(chaveamento);
     cin >> lixo;
+    system("cls");
+    rendelizarcentro(title(winner_logo), screensize);
+
+    bool repeat[2] = {false,false};
+    for(clube c : info.equipes){
+        if(c.id == winner.id && repeat[0]){
+            repeat[1] = true;
+            break;
+        }
+        else if(c.id == winner.id){
+            repeat[0] = true;
+        }
+    }
+
+    if(!repeat[1]){
+        vector<string> result_vencedor;
+        vector<string> fases = {"Final", "Semi Final", "Quarter Final", "Round of 16", "Round of 32"};
+
+        for(int i = 0; i <= gamecont; i++){
+            if(info.jogos[i].t1.id == winner.id || info.jogos[i].t2.id == winner.id){
+                result_vencedor.push_back(info.jogos[i].resume);
+            }
+        }
+        reverse(result_vencedor.begin(), result_vencedor.end());
+        for(int i = 0; i < result_vencedor.size(); i++){
+            result_vencedor[i] += " - " + fases[i];
+        }
+
+        cout << centerstr("Caminho do(a) " + winner.nome + ":", screensize) << "\n\n\n";
+
+        structured_menu(result_vencedor);
+    };
+    cin >> lixo;
+
+
+
 }
 
 
