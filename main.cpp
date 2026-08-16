@@ -1,4 +1,3 @@
-//Feito TOTALMENTE SEM IA!!
 #include "Database.cpp"
 #include "ASCII.cpp"
 
@@ -9,8 +8,9 @@ const vector<string> leagues = {"Brasileirao", "Bundesliga", "Eredivise", "LaLig
 
 
 //configurações globais(terminar depois).
-int screensize = 261;
+int screensize = 244;
 int buttonsize = 30;
+int Gamespeed = 100;
 
 
 
@@ -218,7 +218,7 @@ clube simular_penaltis(resultado &res){
     while(true){
         res.melhores_momentos.push_back(centerstr("Round "+ to_string(penaltyRound) + ": ", screensize - 6));
         rendelizar(res.melhores_momentos);
-        Sleep(300);
+        Sleep(10*Gamespeed);
         system("cls");
         int x = res.melhores_momentos.size() - 1;
         auto gol = aleatorio(1,100);
@@ -232,7 +232,7 @@ clube simular_penaltis(resultado &res){
 
         res.melhores_momentos[x] += "|";
         rendelizar(res.melhores_momentos);
-        Sleep(300);
+        Sleep(10*Gamespeed);
         system("cls");
         gol = aleatorio(1, 100);
 
@@ -245,7 +245,7 @@ clube simular_penaltis(resultado &res){
         }
 
         rendelizar(res.melhores_momentos);
-        Sleep(300);
+        Sleep(10*Gamespeed);
         system("cls");
 
 
@@ -296,7 +296,7 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
         string minuto = to_string(i) + "'";
         if(i > 90) minuto = "90' + " + to_string(i - 90);
         cout << centerstr(addbar(minuto, 52), screensize);
-        Sleep(100);
+        Sleep(Gamespeed);
         clube favevent = calcularevento(time1, time2);
 
         if(favevent.id == time1.id){
@@ -360,7 +360,8 @@ int gerarmenu(vector<string> lista){
     bool correct = false;
     while(!correct){
         vector<string> menu;
-        int maior = 50;
+        int maior = buttonsize + (buttonsize/2);
+        if(maior%2) maior++;
         for(const string &x : lista){
             int num = x.size();
             maior = max(num, maior);
@@ -553,27 +554,31 @@ vector<string> title(vector<string>& ASCII){
 }
 
 void simularcopa(infotorneio &info){
+    init_tournament(info);
     int matchcont = info.qtd_equipes/2;
     int roundgames = matchcont;
-    init_tournament(info);
     vector<string> chaveamento = gerarchaveamento(info);
     rendelizarcentro(title(tournament_logo), screensize);
     rendelizar(chaveamento);
     string lixo;
     cin >> lixo;
     system("cls");
-    for(int i = 0; i < roundgames; i+= 2){
-        resultado r1, r2;
-        r1 = simular_partida(info.jogos[i].t1, info.jogos[i].t2, false, true);
-        r2 = simular_partida(info.jogos[i+1].t1, info.jogos[i+1].t2, false, true);
-        info.jogos[matchcont + (i/2)].t1 = r1.vencedor;
-        info.jogos[matchcont + (i/2)].t2 = r2.vencedor;
+    for(int i = 0; i < roundgames; i += 2){
+        info.jogos[i] = simular_partida(info.jogos[i].t1, info.jogos[i].t2, false, true);
+        info.jogos[i+1] = simular_partida(info.jogos[i+1].t1, info.jogos[i+1].t2, false, true);
+        info.jogos[matchcont + (i/2)].t1 = info.jogos[i].vencedor;
+        info.jogos[matchcont + (i/2)].t2 = info.jogos[i+1].vencedor;
     }
-     system("cls");
+    roundgames /= 2;
+    matchcont += roundgames;
+
+    system("cls");
     chaveamento = gerarchaveamento(info);
     rendelizarcentro(title(tournament_logo), screensize);
     rendelizar(chaveamento);
+    cin >> lixo;
 }
+
 
 int main(){
     //A main vai servir como fluxo de menus!
@@ -624,16 +629,41 @@ int main(){
         else if(fluxo_menu == 3){
             // fazer amanha.
             rendelizarcentro(title(settings_logo), screensize);
-            const vector<string> settings_menu = {"Buttons Resize", "Match Speed", "ScreenSize", "Voltar"};
+            const vector<string> settings_menu = {"Buttons Resize", "Match Speed", "ScreenSize", "More Info", "Voltar"};
             fluxo_menu = gerarmenu(settings_menu);
             if(fluxo_menu == 1){
-
+                rendelizarcentro(title(settings_logo), screensize);
+                const vector<string> match_buttons = {"Big", "Normal", "Small", "Voltar"};
+                fluxo_menu = gerarmenu(match_buttons);
+                if(fluxo_menu == 4) continue;
+                else if(fluxo_menu == 3) buttonsize = 25;
+                else if(fluxo_menu == 2) buttonsize = 30;
+                else if(fluxo_menu == 1) buttonsize = 50;
             }
             else if(fluxo_menu == 2){
-
+                rendelizarcentro(title(settings_logo), screensize);
+                const vector<string> match_speeds = {"Super Slow", "Slow", "Normal", "Fast", "Super Fast", "Instant", "Voltar"};
+                fluxo_menu = gerarmenu(match_speeds);
+                if(fluxo_menu == 7) continue;
+                else if(fluxo_menu == 6) Gamespeed = 0;
+                else if(fluxo_menu == 5) Gamespeed = 20;
+                else if(fluxo_menu == 4) Gamespeed = 50;
+                else if(fluxo_menu == 3) Gamespeed = 100;
+                else if(fluxo_menu == 2) Gamespeed = 200;
+                else if(fluxo_menu == 1) Gamespeed = 400;
             }
             else if(fluxo_menu == 3){
-
+                rendelizarcentro(title(settings_logo), screensize);
+                const vector<string> match_screen = {"Big", "Normal", "Small", "Window", "Voltar"};
+                fluxo_menu = gerarmenu(match_screen);
+                if(fluxo_menu == 5) continue;
+                if(fluxo_menu == 4) screensize = 261;
+                if(fluxo_menu == 3) screensize = 185;
+                if(fluxo_menu == 2) screensize = 244;
+                if(fluxo_menu == 1) screensize = 291;
+            }
+            else if(fluxo_menu == 4){
+                
             }
             else{
                 continue;
