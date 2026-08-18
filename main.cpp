@@ -28,6 +28,23 @@ struct infotorneio{
     vector<resultado> jogos;
 };
 
+struct pontos{
+    clube equipe;
+    int pts = 0;
+    int GF = 0, GA = 0, SG = 0;
+    int V = 0, D = 0, E = 0;
+};
+
+struct rodada{
+    resultado jogos[10];
+};
+
+struct infoleagues{
+    vector<rodada> r;
+    vector<pontos> competidores;
+
+};
+
 vector<string> nivelar(vector<string> frame){
     int size;
     int maxsize = frame[0].size();
@@ -180,7 +197,7 @@ int gx(resultado res, int minute, int ordem){ //0 nao muda e 1 muda
         g /= acumulativo;
     }
     if(qtdgols > 5) g /= 3;
-    if(g > 12) g = 10;
+    if(g > 6) g = 6;
     return g;
 }
 
@@ -698,10 +715,49 @@ void simularcopa(infotorneio &info){
 
 }
 
+void init_league(infoleagues& info){
+    vector<string> decision = {"Choose Teams", "Random Teams", "National Cup"};
+    info.r = vector<rodada>(38);
+    info.competidores = vector<pontos>(20);
+
+    int decisao = gerarmenu(decision);
+
+        if(decisao == 1){
+            for(pontos& eqp : info.competidores){
+                int ID = selecionartime();
+                eqp.equipe = teams[ID];
+            }
+        }
+        else if(decisao == 2){
+            for(pontos& eqp : info.competidores){
+                int ID = aleatorio(1,240);
+                while(teams[ID].id != ID) ID = aleatorio(1,240);
+                eqp.equipe = teams[ID];
+            }
+        }
+        else{
+            int liga = gerarmenu(leagues);
+            liga--;
+            int inicio = ((liga*20) + 1), fim = inicio + 19;
+            vector<clube> aux;
+            for(int i = inicio; i <= fim; i++){
+                aux.push_back(teams[i]);
+            }
+            vector<bool> mark(19, false);
+
+            int ID = 0;
+            for(pontos& eqp : info.competidores){
+                eqp.equipe = aux[ID];
+                ID++;
+            }
+
+        }
+}
+
 
 int main(){
     //A main vai servir como fluxo de menus!
-    
+    ///*
     const vector<string> menu_inicial = {"Jogo Rapido", "Torneio", "Configuracoes", "Sair"};
     int fluxo_menu = 1;
     //gamestart:
@@ -795,4 +851,5 @@ int main(){
             fluxo_menu = -1;
         }
     }while(fluxo_menu != -1);
+    //*/
 }
