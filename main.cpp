@@ -22,6 +22,17 @@ struct resultado{
     string resume;
 };
 
+bool operator==(const clube& a, const clube& b) {
+    return a.id == b.id;
+}
+
+struct HashClube {
+    size_t operator()(const clube& c) const {
+        return hash<int>()(c.id);
+    }
+};
+
+
 struct infotorneio{
     int qtd_equipes;
     vector<clube> equipes;
@@ -29,7 +40,7 @@ struct infotorneio{
 };
 
 struct pontos{
-    clube equipe;
+    clube equipe = {};
     int pts = 0;
     int GF = 0, GA = 0, SG = 0;
     int V = 0, D = 0, E = 0;
@@ -79,6 +90,15 @@ string centerstr(const string &a, const int &screensize){ //Tamanho da tela: scr
     }
     b += a;
     return b;
+}
+
+string centerstri(const string& x, int size){
+    int tamanho = x.size();
+    int espacos = size - tamanho;
+
+    return string(espacos / 2, ' ') +
+           x +
+           string(espacos - espacos / 2, ' ');
 }
 
 string barstr(const string &a, const int &screensize){ //Tamanho da tela: screensize caracters
@@ -145,8 +165,7 @@ string addbar(string &a, int size){
 }
 
 
-void structured_menu(vector<string> lista){
-    int maior = 60;
+vector<string> structured_menu(vector<string> lista, int maior = 100, bool rend = true){
     for(string x : lista){
         int aux = x.size();
         maior = max(maior, aux);
@@ -162,6 +181,7 @@ void structured_menu(vector<string> lista){
         for(int i = 0; i < dif; i++) space += " ";
         x = space + x + space;
         if(kbum) x.pop_back();
+        if(x.size()%2) x.pop_back();
     }
     nivelar(lista);
     maior = lista[0].size();
@@ -172,7 +192,8 @@ void structured_menu(vector<string> lista){
         menu.push_back("|" + x + "|");
         menu.push_back(bar);
     }
-    rendelizarcentro(menu, screensize);
+    if(rend) rendelizarcentro(menu, screensize);
+    return menu;
 }
 
 
@@ -197,7 +218,9 @@ int gx(resultado res, int minute, int ordem){ //0 nao muda e 1 muda
         g /= acumulativo;
     }
     if(qtdgols > 5) g /= 3;
-    if(g > 6) g = 6;
+    int dife = res.gols1 - res.gols2;
+    if(ordem) dife * -1;
+    if(g > 7 - dif) g = 7 - dife;
     return g;
 }
 
@@ -404,6 +427,76 @@ resultado simular_partida(const clube &time1, const clube &time2, bool fatorcasa
     
 
     system("cls");
+    return placar_final;
+}
+
+resultado simular_partida_instant(const clube &time1, const clube &time2, bool fatorcasa = true){
+    resultado placar_final;
+    placar_final.vencedor = teams[261];
+    placar_final.t1 = time1;
+    placar_final.t2 = time2;
+    string match_started = "MATCH EVENTS";
+    vector<string> eventos;
+    string bar = repeat("-", 50);
+    string frase_inicio = addbar(match_started, (int)32);
+    string space = repeat(" ", screensize);
+    eventos.push_back(space);
+    eventos.push_back(centerstr(bar, screensize));
+    bar = repeat("-", 30);
+    eventos.push_back(centerstr(addbar(frase_inicio, 52), screensize));
+    eventos.push_back(centerstr(addbar(bar, 52), screensize));
+    bar = repeat("-", 50);
+    string ax = "";
+    eventos.push_back(centerstr(addbar(ax, 52), screensize));
+
+    int acrecimos = aleatorio(0,8);
+
+    for(int i = 0; i <= 90 + acrecimos; i++){
+       
+
+        string minuto = to_string(i) + "'";
+        if(i > 90) minuto = "90' + " + to_string(i - 90);
+        clube favevent = calcularevento(time1, time2);
+
+        if(favevent.id == time1.id){
+            int GolsExperados = gx(placar_final, i, 0);
+            if(fatorcasa) GolsExperados += 3;
+            int converter = aleatorio(1, 100);
+            if(converter <= GolsExperados){
+                placar_final.gols1++;;
+                string frase = minuto + " " + time1.nome + " Scored!";
+                eventos.push_back(centerstr(addbar(frase, 52), screensize));
+            }
+        }
+        else{
+            int GolsExperados = gx(placar_final, i, 1);
+            if(fatorcasa) GolsExperados -= 3;
+            int converter = aleatorio(1, 100);
+            if(converter <= GolsExperados){
+                placar_final.gols2++;
+                string frase = minuto + " " + time2.nome + " Scored!";
+                eventos.push_back(centerstr(addbar(frase, 52), screensize));
+            }
+        }
+        if(i == 90 + acrecimos){
+            eventos.push_back(centerstr(addbar(ax, 52), screensize));
+            eventos.push_back(centerstr(bar, screensize));
+        }
+        if(i == 45){
+            string t1 = time1.nome, t2 = time2.nome;
+            eventos.push_back(centerstr(addbar(ax, 52), screensize));
+            ax = "[HALF TIME : " + abreviar(t1) + " " + to_string(placar_final.gols1) + " x " + to_string(placar_final.gols2) + " " + abreviar(t2) + "]";
+            ax = barstr(ax, 50);
+            eventos.push_back(centerstr(addbar(ax, 52), screensize));
+            ax = "";
+            eventos.push_back(centerstr(addbar(ax, 52), screensize));
+        }
+        placar_final.melhores_momentos = eventos;
+    }
+    if(placar_final.gols1 > placar_final.gols2) placar_final.vencedor = placar_final.t1;
+    else if(placar_final.gols1 < placar_final.gols2) placar_final.vencedor = placar_final.t2;
+    
+
     return placar_final;
 }
 
@@ -741,7 +834,10 @@ void init_league(infoleagues& info){
             int inicio = ((liga*20) + 1), fim = inicio + 19;
             vector<clube> aux;
             for(int i = inicio; i <= fim; i++){
-                aux.push_back(teams[i]);
+                if(teams[i].nome != "NA") aux.push_back(teams[i]);
+                else aux.push_back(teams[i-5]);
+                
+                cout << teams[i].nome << "\n";
             }
             vector<bool> mark(19, false);
 
@@ -750,14 +846,232 @@ void init_league(infoleagues& info){
                 eqp.equipe = aux[ID];
                 ID++;
             }
+        }
 
+
+}
+
+bool sortleague(pontos a, pontos b){
+    if(!(a.pts == b.pts)){
+        return a.pts > b.pts;
+    }
+
+    if(!(a.SG == b.SG)){
+        return a.SG > b.SG;
+    }
+
+    if(!(a.V == b.V)){
+        return a.V > b.V;
+    }
+
+    return false;
+}
+
+int IDfind(vector<pontos>& club, int ID){
+    int cont = 0;
+    for(pontos& x : club){
+        if(x.equipe.id == teams[ID].id){
+            return cont;
+        }
+        cont++;
+    }
+    return -1;
+}
+
+void desloca(vector<pontos>& club){
+    int d = club.size() - 1;
+    pontos eqp = club[d], ax = club[0];
+
+    for(int i = 1; i <= d; i++){
+        pontos aux = ax;
+        ax = club[i];
+        club[i] = aux;
+    }
+    club[0] = eqp;
+
+
+
+}
+
+void gerarconfrontos(infoleagues& info){
+        for(int i = 0; i < 90; i++){
+            shuffle(info.competidores.begin(), info.competidores.end(), gen);
+        }
+
+        for(int k = 0; k < 38; k++){
+            for(int i = 0; i < 10; i++){
+                int j = 19 - i;
+                info.r[k].jogos[i].t1 = info.competidores[i].equipe;
+                info.r[k].jogos[i].t2 = info.competidores[j].equipe;
+
+            }
+            desloca(info.competidores);
         }
 }
+
+string structured(const pontos& team){
+    string line = "";
+    line = centerstri(team.equipe.nome, 32) + "|" + centerstri(to_string(team.pts), 5) + "|" + centerstri(to_string(team.SG), 5) + "|" + centerstri(to_string(team.V), 5) + "|" + centerstri(to_string(team.D), 5) + "|" + centerstri(to_string(team.E), 5) + "|" + centerstri(to_string(team.GF), 5) + "|" + centerstri(to_string(team.GA), 5);
+    return line;
+}
+
+string line_round(const resultado& res){
+    string line = res.t1.nome + " " + to_string(res.gols1) + " x " + to_string(res.gols2) + " " + res.t2.nome;
+    return line;
+}
+
+void showleague(vector<pontos>& comp){
+    sort(comp.begin(), comp.end(), sortleague);
+    string line1 = centerstri(" ===TEAMS===", 32) + "|" + " PTS " + "|" + "  SG " + "|" + "  W  " + "|" + "  L  " + "|" + "  T  " + "|" + "  GF " + "|" + " GA  ";
+    vector<string> list;
+    list.push_back(line1);
+    for(auto& var : comp){
+        list.push_back(structured(var));
+    }
+    //structured_menu(list);
+    list = structured_menu(list, 0, false);
+    nivelar(list);
+
+    int cnt = 1;
+    for(int i = 3; i < list.size(); i += 2){
+        list[i] += " " + to_string(cnt);
+        cnt++;
+    }
+
+    list = nivelar(list);
+
+    rendelizarcentro(list, screensize);
+
+}
+
+void atualizarinfo(infoleagues& info, int round){
+    for(int i = 0; i < 10; i++){
+        resultado& res = info.r[round].jogos[i];
+        int post1 = IDfind(info.competidores, res.t1.id);
+        int post2 = IDfind(info.competidores, res.t2.id);
+
+        info.competidores[post1].GF += res.gols1;
+        info.competidores[post1].GA += res.gols2;
+        info.competidores[post1].SG = info.competidores[post1].GF - info.competidores[post1].GA;
+
+        info.competidores[post2].GF += res.gols2;
+        info.competidores[post2].GA += res.gols1;
+        info.competidores[post2].SG = info.competidores[post2].GF - info.competidores[post2].GA;
+
+        if(res.vencedor == res.t1){
+            info.competidores[post1].V++;
+            info.competidores[post1].pts += 3;
+
+            info.competidores[post2].D++;
+        }
+        else if(res.vencedor == res.t2){
+            info.competidores[post2].V++;
+            info.competidores[post2].pts += 3;
+
+            info.competidores[post1].D++;
+        }
+        else{
+            info.competidores[post1].E++;
+            info.competidores[post1].pts++;
+
+            info.competidores[post2].E++;
+            info.competidores[post2].pts++;
+        }
+
+    }
+}
+
+void simular_rodada(infoleagues& info, int round){
+    for(int i = 0; i < 10; i++){
+        resultado& res = info.r[round].jogos[i];
+        res = simular_partida_instant(res.t1, res.t2);
+        int post1 = IDfind(info.competidores, res.t1.id);
+        int post2 = IDfind(info.competidores, res.t2.id);
+
+        info.competidores[post1].GF += res.gols1;
+        info.competidores[post1].GA += res.gols2;
+        info.competidores[post1].SG = info.competidores[post1].GF - info.competidores[post1].GA;
+
+        info.competidores[post2].GF += res.gols2;
+        info.competidores[post2].GA += res.gols1;
+        info.competidores[post2].SG = info.competidores[post2].GF - info.competidores[post2].GA;
+
+        if(res.vencedor == res.t1){
+            info.competidores[post1].V++;
+            info.competidores[post1].pts += 3;
+
+            info.competidores[post2].D++;
+        }
+        else if(res.vencedor == res.t2){
+            info.competidores[post2].V++;
+            info.competidores[post2].pts += 3;
+
+            info.competidores[post1].D++;
+        }
+        else{
+            info.competidores[post1].E++;
+            info.competidores[post1].pts++;
+
+            info.competidores[post2].E++;
+            info.competidores[post2].pts++;
+        }
+
+    }
+}
+
+void leaguemode(infoleagues& info){
+    init_league(info);
+    gerarconfrontos(info);
+    string lixo;
+    for(int i = 0; i < 38; i++){
+        system("cls");
+        rendelizarcentro(title(round_logo), screensize);
+        cout << centerstr("Round " + to_string(i+1), screensize) << "\n\n";
+        showleague(info.competidores);
+
+        cin >> lixo;
+        system("cls");
+
+        rendelizarcentro(title(round_logo), screensize);
+        cout << centerstr("Round " + to_string(i+1), screensize) << "\n\n";
+        vector<string> games;
+        for(int j = 0; j < 10; j++){
+            string ax = line_round(info.r[i].jogos[j]);
+            games.push_back(ax);
+        }
+        structured_menu(games);
+
+        cin >> lixo;
+        system("cls");
+
+        rendelizarcentro(title(Simulating_logo), screensize);
+        simular_rodada(info, i);
+        cout << centerstr("round finished!\n", screensize);
+
+        cin >> lixo;
+        system("cls");
+
+
+        games = vector<string>();
+        rendelizarcentro(title(round_logo), screensize);
+        cout << centerstr("Round " + to_string(i+1), screensize) << "\n\n";
+        for(int j = 0; j < 10; j++){
+            string ax = line_round(info.r[i].jogos[j]);
+            games.push_back(ax);
+        }
+        structured_menu(games);
+
+        cin >> lixo;
+
+    }
+
+}
+
 
 
 int main(){
     //A main vai servir como fluxo de menus!
-    ///*
+
     const vector<string> menu_inicial = {"Jogo Rapido", "Torneio", "Configuracoes", "Sair"};
     int fluxo_menu = 1;
     //gamestart:
@@ -851,5 +1165,11 @@ int main(){
             fluxo_menu = -1;
         }
     }while(fluxo_menu != -1);
+
+    ///*
+        infoleagues info;
+        leaguemode(info);
+        
     //*/
+
 }
