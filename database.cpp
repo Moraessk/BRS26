@@ -4,8 +4,8 @@ std::vector<clube> teams = {
     {"World Class", 99, 99, 99, 0}, //Aqui ta nessa ordem: nome, ataque, meio campo e defesa
     //Brasileirão 1 - 20
     {"Palmeiras", 82, 81, 80, 1}, {"Flamengo", 82, 84, 81, 2}, {"Corinthians", 75, 76, 77, 3}, {"Fluminense", 74, 78, 76, 4}, {"Bahia", 75, 76, 74, 5}, 
-    {"Botafogo", 70, 74, 75, 6}, {"Athletico Paranaense", 72, 73, 73, 7}, {"Atletico Mineiro", 70, 74, 73, 8}, {"Red Bull Bragantino", 69, 72, 72, 9}, 
-    {"Sao Paulo", 71, 72, 70, 10}, {"Gremio", 76, 71, 71, 11}, {"Cruzeiro", 79, 80, 78, 12}, {"Internacional", 74, 73, 74, 13}, {"Santos", 80, 69, 72, 14}, 
+    {"Botafogo", 70, 74, 75, 6}, {"Athletico Paranaense", 72, 73, 73, 7}, {"Atletico Mineiro", 70, 74, 73, 8}, {"Red Bull Bragantino", 75, 74, 75, 9}, 
+    {"Sao Paulo", 71, 72, 70, 10}, {"Gremio", 76, 71, 71, 11}, {"Cruzeiro", 79, 80, 78, 12}, {"Internacional", 74, 73, 74, 13}, {"Santos", 78, 69, 72, 14}, 
     {"Vasco da Gama", 74, 70, 69, 15}, {"Coritiba", 72, 74, 71, 16}, {"Vitoria", 69, 70, 69, 17}, {"Mirassol", 71, 70, 69, 18}, {"Remo", 63, 65, 66, 19}, 
     {"Chapecoense", 63, 65, 66, 20},
 
@@ -80,6 +80,8 @@ std::vector<clube> teams = {
     {"Spain", 88, 92, 94, 241}, {"Argentina", 86, 91, 92, 242}, {"France", 87, 90, 93, 243}, {"England", 85, 89, 90, 244}, {"Brazil", 84, 88, 91, 245}, {"Portugal", 83, 87, 89, 246},
     {"Netherlands", 82, 85, 87, 247}, {"Germany", 82, 85, 86, 248}, {"Belgium", 80, 83, 85, 249}, {"Italy", 80, 82, 84, 250}, {"Colombia", 79, 83, 85, 251}, {"Croatia", 79, 81, 82, 252},
     {"Morocco", 78, 81, 83, 253}, {"Uruguay", 78, 82, 83, 254}, {"Japan", 76, 79, 81, 255}, {"Switzerland", 77, 79, 80, 256}, {"Denmark", 76, 79, 80, 257}, {"Senegal", 76, 80, 82, 258},
-    {"Mexico", 75, 78, 80, 259}, {"United States", 73, 77, 79, 260}
+    {"Mexico", 75, 78, 80, 259}, {"United States", 73, 77, 79, 260},
     //Borussia Monchengladbach é o time com + caracteries 26 no total.
+
+    {"Empate", 0, 0, 0, 261}
 };
